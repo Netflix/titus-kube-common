@@ -1,6 +1,7 @@
 package node
 
 const (
+	AnnotationKeyAccount        = "node.titus.netflix.com/account"
 	AnnotationKeyAccountID      = "node.titus.netflix.com/accountId"
 	AnnotationKeyAMI            = "node.titus.netflix.com/ami"
 	AnnotationKeyASG            = "node.titus.netflix.com/asg"
