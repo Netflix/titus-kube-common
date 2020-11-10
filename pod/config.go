@@ -55,6 +55,7 @@ type Config struct {
 	StaticIPAllocation     *string
 	SubnetIDs              *string
 	TaskID                 *string
+	TTYEnabled             *bool
 }
 
 // PodToConfig pulls out values from a pod and turns them into a Config
@@ -71,5 +72,21 @@ func PodToConfig(pod *corev1.Pod) (*Config, error) {
 		return pConf, err
 	}
 
+	err = parsePodFields(pod, pConf)
+	if err != nil {
+		return pConf, err
+	}
+
 	return pConf, err
+}
+
+func parsePodFields(pod *corev1.Pod, pConf *Config) error {
+	firstContainer := pod.Spec.Containers[0]
+
+	if firstContainer.TTY {
+		ttyEnabled := true
+		pConf.TTYEnabled = &ttyEnabled
+	}
+
+	return nil
 }

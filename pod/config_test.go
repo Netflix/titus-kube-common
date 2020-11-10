@@ -32,7 +32,7 @@ func uint64Ptr(val uint64) *uint64 {
 	return ptrVal
 }
 
-func TestParsePod(t *testing.T) {
+func buildPod(annotations, labels map[string]string) *corev1.Pod {
 	cpu := resource.NewQuantity(1, resource.DecimalSI)
 	gpu := resource.NewQuantity(0, resource.DecimalSI)
 	mem := resource.NewQuantity(512, resource.BinarySI)
@@ -41,82 +41,10 @@ func TestParsePod(t *testing.T) {
 
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo",
-			Namespace: "default",
-			Annotations: map[string]string{
-				// strings
-				AnnotationKeyAppDetail:             "mydetail",
-				AnnotationKeyAppName:               "myapp",
-				AnnotationKeyAppOwnerEmail:         "test@example.com",
-				AnnotationKeyAppSequence:           "v000",
-				AnnotationKeyAppStack:              "mystack",
-				AnnotationKeyIAMRole:               "arn:aws:iam::0:role/DefaultContainerRole",
-				AnnotationKeyJobID:                 "myjobid",
-				AnnotationKeyJobType:               "BATCH",
-				AnnotationKeyJobDescriptor:         "myjobdesc",
-				AnnotationKeyPodTitusContainerInfo: "cinfo",
-
-				AnnotationKeyNetworkAccountID:          "123456",
-				AnnotationKeyNetworkElasticIPPool:      "pool-1",
-				AnnotationKeyNetworkElasticIPs:         "eip-1,eip-2",
-				AnnotationKeyNetworkIMDSRequireToken:   "require-token",
-				AnnotationKeyNetworkSecurityGroups:     "sg-1,sg-2",
-				AnnotationKeyNetworkStaticIPAllocation: "static-ip-alloc",
-				AnnotationKeyNetworkSubnetIDs:          "subnet-1,subnet-2",
-
-				// We don't parse these right now - including them so that
-				// tests fail if we do start parsing them or remove them
-				AnnotationKeyOpportunisticCPU:              "4",
-				AnnotationKeyOpportunisticResourceID:       "op-res-id",
-				AnnotationKeyPredictionRuntime:             "44",
-				AnnotationKeyPredictionConfidence:          "5",
-				AnnotationKeyPredictionModelID:             "model-id",
-				AnnotationKeyPredictionModelVersion:        "v2",
-				AnnotationKeyPredictionABTestCell:          "cell1",
-				AnnotationKeyPredictionPredictionAvailable: "a,b",
-				AnnotationKeyPredictionSelectorInfo:        "prediction",
-
-				AnnotationKeySecurityAppMetadata:    "app-metadata",
-				AnnotationKeySecurityAppMetadataSig: "app-metadata-sig",
-
-				AnnotationKeyPodHostnameStyle: "ec2",
-				AnnotationKeyPodSchedPolicy:   "batch",
-
-				AnnotationKeyLogS3BucketName:    "bucket-name",
-				AnnotationKeyLogS3PathPrefix:    "s3-prefix",
-				AnnotationKeyLogS3WriterIAMRole: "arn:aws:iam::0:role/LogWriterRole",
-
-				AnnotationKeyServiceServiceMeshImage: "titusoss/service-mesh",
-
-				// bools
-				AnnotationKeyLogKeepLocalFile:          "true",
-				AnnotationKeyNetworkAssignIPv6Address:  "true",
-				AnnotationKeyNetworkBurstingEnabled:    "true",
-				AnnotationKeyNetworkJumboFramesEnabled: "true",
-				AnnotationKeyPodCPUBurstingEnabled:     "true",
-				AnnotationKeyPodFuseEnabled:            "true",
-				AnnotationKeyPodKvmEnabled:             "true",
-				AnnotationKeyServiceServiceMeshEnabled: "true",
-
-				// ints
-				AnnotationKeyPodSchemaVersion:       "2",
-				AnnotationKeyJobAcceptedTimestampMs: "1602201163007",
-				AnnotationKeyPodOomScoreAdj:         "-800",
-
-				// resource values
-				AnnotationKeyEgressBandwidth:  "10M",
-				AnnotationKeyIngressBandwidth: "20M",
-
-				// durations
-				AnnotationKeyLogStdioCheckInterval:  "2m",
-				AnnotationKeyLogUploadCheckInterval: "1m",
-				AnnotationKeyLogUploadThresholdTime: "3m",
-			},
-			Labels: map[string]string{
-				LabelKeyByteUnitsEnabled: "true",
-				LabelKeyCapacityGroup:    "DEFAULT",
-				LabelKeyTaskId:           "task-id-in-label",
-			},
+			Name:        "foo",
+			Namespace:   "default",
+			Annotations: annotations,
+			Labels:      labels,
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{
@@ -139,11 +67,93 @@ func TestParsePod(t *testing.T) {
 							resourceCommon.ResourceNameNetwork: *network,
 						},
 					},
+					TTY: true,
 				},
 			},
 		},
 	}
 
+	return pod
+}
+
+func TestParsePod(t *testing.T) {
+	annotations := map[string]string{
+		// strings
+		AnnotationKeyAppDetail:             "mydetail",
+		AnnotationKeyAppName:               "myapp",
+		AnnotationKeyAppOwnerEmail:         "test@example.com",
+		AnnotationKeyAppSequence:           "v000",
+		AnnotationKeyAppStack:              "mystack",
+		AnnotationKeyIAMRole:               "arn:aws:iam::0:role/DefaultContainerRole",
+		AnnotationKeyJobID:                 "myjobid",
+		AnnotationKeyJobType:               "BATCH",
+		AnnotationKeyJobDescriptor:         "myjobdesc",
+		AnnotationKeyPodTitusContainerInfo: "cinfo",
+
+		AnnotationKeyNetworkAccountID:          "123456",
+		AnnotationKeyNetworkElasticIPPool:      "pool-1",
+		AnnotationKeyNetworkElasticIPs:         "eip-1,eip-2",
+		AnnotationKeyNetworkIMDSRequireToken:   "require-token",
+		AnnotationKeyNetworkSecurityGroups:     "sg-1,sg-2",
+		AnnotationKeyNetworkStaticIPAllocation: "static-ip-alloc",
+		AnnotationKeyNetworkSubnetIDs:          "subnet-1,subnet-2",
+
+		// We don't parse these right now - including them so that
+		// tests fail if we do start parsing them or remove them
+		AnnotationKeyOpportunisticCPU:              "4",
+		AnnotationKeyOpportunisticResourceID:       "op-res-id",
+		AnnotationKeyPredictionRuntime:             "44",
+		AnnotationKeyPredictionConfidence:          "5",
+		AnnotationKeyPredictionModelID:             "model-id",
+		AnnotationKeyPredictionModelVersion:        "v2",
+		AnnotationKeyPredictionABTestCell:          "cell1",
+		AnnotationKeyPredictionPredictionAvailable: "a,b",
+		AnnotationKeyPredictionSelectorInfo:        "prediction",
+
+		AnnotationKeySecurityAppMetadata:    "app-metadata",
+		AnnotationKeySecurityAppMetadataSig: "app-metadata-sig",
+
+		AnnotationKeyPodHostnameStyle: "ec2",
+		AnnotationKeyPodSchedPolicy:   "batch",
+
+		AnnotationKeyLogS3BucketName:    "bucket-name",
+		AnnotationKeyLogS3PathPrefix:    "s3-prefix",
+		AnnotationKeyLogS3WriterIAMRole: "arn:aws:iam::0:role/LogWriterRole",
+
+		AnnotationKeyServiceServiceMeshImage: "titusoss/service-mesh",
+
+		// bools
+		AnnotationKeyLogKeepLocalFile:          "true",
+		AnnotationKeyNetworkAssignIPv6Address:  "true",
+		AnnotationKeyNetworkBurstingEnabled:    "true",
+		AnnotationKeyNetworkJumboFramesEnabled: "true",
+		AnnotationKeyPodCPUBurstingEnabled:     "true",
+		AnnotationKeyPodFuseEnabled:            "true",
+		AnnotationKeyPodKvmEnabled:             "true",
+		AnnotationKeyServiceServiceMeshEnabled: "true",
+
+		// ints
+		AnnotationKeyPodSchemaVersion:       "2",
+		AnnotationKeyJobAcceptedTimestampMs: "1602201163007",
+		AnnotationKeyPodOomScoreAdj:         "-800",
+
+		// resource values
+		AnnotationKeyEgressBandwidth:  "10M",
+		AnnotationKeyIngressBandwidth: "20M",
+
+		// durations
+		AnnotationKeyLogStdioCheckInterval:  "2m",
+		AnnotationKeyLogUploadCheckInterval: "1m",
+		AnnotationKeyLogUploadThresholdTime: "3m",
+	}
+
+	labels := map[string]string{
+		LabelKeyByteUnitsEnabled: "true",
+		LabelKeyCapacityGroup:    "DEFAULT",
+		LabelKeyTaskId:           "task-id-in-label",
+	}
+
+	pod := buildPod(annotations, labels)
 	conf, err := PodToConfig(pod)
 	assert.NilError(t, err)
 
@@ -192,8 +202,72 @@ func TestParsePod(t *testing.T) {
 		StaticIPAllocation:     ptr.StringPtr("static-ip-alloc"),
 		SubnetIDs:              ptr.StringPtr("subnet-1,subnet-2"),
 		TaskID:                 ptr.StringPtr("task-id-in-label"),
+		TTYEnabled:             ptr.BoolPtr(true),
 	}
 	assert.DeepEqual(t, expConf, *conf)
+}
+
+func TestParsePodInvalid(t *testing.T) {
+
+	badAnnotations := []struct {
+		annotations map[string]string
+		errMatch    string
+	}{
+		{
+			annotations: map[string]string{
+				AnnotationKeyPodHostnameStyle: "not-ec2",
+			},
+			errMatch: "annotation is not a valid hostname style: " + AnnotationKeyPodHostnameStyle,
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyLogKeepLocalFile: "yes",
+			},
+			errMatch: "annotation is not a valid boolean value: " + AnnotationKeyLogKeepLocalFile,
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyPodSchemaVersion: "-2",
+			},
+			errMatch: "annotation is not a valid uint32 value: " + AnnotationKeyPodSchemaVersion,
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyJobAcceptedTimestampMs: "-5",
+			},
+			errMatch: "annotation is not a valid uint64 value: " + AnnotationKeyJobAcceptedTimestampMs,
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyPodOomScoreAdj: "foo",
+			},
+			errMatch: "annotation is not a valid int32 value: " + AnnotationKeyPodOomScoreAdj,
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyEgressBandwidth: "10ZiB",
+			},
+			errMatch: "annotation is not a valid resource value: " + AnnotationKeyEgressBandwidth,
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyLogStdioCheckInterval: "2yearz",
+			},
+			errMatch: "annotation is not a valid duration value: " + AnnotationKeyLogStdioCheckInterval,
+		},
+	}
+
+	for _, ann := range badAnnotations {
+		pod := buildPod(ann.annotations, map[string]string{})
+		_, err := PodToConfig(pod)
+		assert.ErrorContains(t, err, ann.errMatch)
+	}
+
+	pod := buildPod(map[string]string{}, map[string]string{
+		LabelKeyByteUnitsEnabled: "yep",
+	})
+	_, err := PodToConfig(pod)
+	assert.ErrorContains(t, err, "label is not a valid boolean value: "+LabelKeyByteUnitsEnabled)
 }
 
 // XXX: test all nil

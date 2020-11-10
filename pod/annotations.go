@@ -321,6 +321,12 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		}
 	}
 
+	if hostnameStyle, ok := annotations[AnnotationKeyPodHostnameStyle]; ok {
+		if hostnameStyle != "ec2" && hostnameStyle != "" {
+			err = multierror.Append(err, fmt.Errorf("annotation is not a valid hostname style: %s", AnnotationKeyPodHostnameStyle))
+		}
+	}
+
 	for _, an := range boolAnnotations {
 		val, ok := annotations[an.key]
 		if ok {
@@ -328,7 +334,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			if pErr == nil {
 				*an.field = &boolVal
 			} else {
-				err = multierror.Append(pErr, fmt.Errorf("annotation is not a valid boolean value: %s", an.key))
+				err = multierror.Append(err, fmt.Errorf("annotation is not a valid boolean value: %s", an.key))
 			}
 		}
 	}
@@ -340,7 +346,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			parsedUint32 := uint32(parsedVal)
 			pConf.PodSchemaVersion = &parsedUint32
 		} else {
-			err = multierror.Append(pErr, fmt.Errorf("annotation is not a valid uint32 value: %s", AnnotationKeyPodSchemaVersion))
+			err = multierror.Append(err, fmt.Errorf("annotation is not a valid uint32 value: %s", AnnotationKeyPodSchemaVersion))
 		}
 	}
 
@@ -351,7 +357,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			parsedUint64 := uint64(parsedVal)
 			pConf.JobAcceptedTimestampMs = &parsedUint64
 		} else {
-			err = multierror.Append(pErr, fmt.Errorf("annotation is not a valid uint64 value: %s", AnnotationKeyJobAcceptedTimestampMs))
+			err = multierror.Append(err, fmt.Errorf("annotation is not a valid uint64 value: %s", AnnotationKeyJobAcceptedTimestampMs))
 		}
 	}
 
@@ -362,7 +368,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			parsedInt32 := int32(parsedVal)
 			pConf.OomScoreAdj = &parsedInt32
 		} else {
-			err = multierror.Append(pErr, fmt.Errorf("annotation is not a valid int32 value: %s", AnnotationKeyPodOomScoreAdj))
+			err = multierror.Append(err, fmt.Errorf("annotation is not a valid int32 value: %s", AnnotationKeyPodOomScoreAdj))
 		}
 	}
 
@@ -373,7 +379,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			if pErr == nil {
 				*an.field = &resVal
 			} else {
-				err = multierror.Append(pErr, fmt.Errorf("annotation is not a valid resource value: %s", an.key))
+				err = multierror.Append(err, fmt.Errorf("annotation is not a valid resource value: %s", an.key))
 			}
 		}
 	}
@@ -385,7 +391,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			if pErr == nil {
 				*an.field = &durVal
 			} else {
-				err = multierror.Append(pErr, fmt.Errorf("annotation is not a valid duration: %s", an.key))
+				err = multierror.Append(err, fmt.Errorf("annotation is not a valid duration value: %s", an.key))
 			}
 		}
 	}
