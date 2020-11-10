@@ -17,7 +17,7 @@ func durationPtr(val string) *time.Duration {
 	return &durVal
 }
 
-func resourcePtr(val string) *resource.Quantity {
+func stringToResourcePtr(val string) *resource.Quantity {
 	resVal, _ := resource.ParseQuantity(val)
 	return &resVal
 }
@@ -35,9 +35,9 @@ func uint64Ptr(val uint64) *uint64 {
 func buildPod(annotations, labels map[string]string) *corev1.Pod {
 	cpu := resource.NewQuantity(1, resource.DecimalSI)
 	gpu := resource.NewQuantity(0, resource.DecimalSI)
-	mem := resource.NewQuantity(512, resource.BinarySI)
-	disk := resource.NewQuantity(999000, resource.BinarySI)
-	network := resource.NewQuantity(128, resource.BinarySI)
+	mem, _ := resource.ParseQuantity("512Mi")
+	disk, _ := resource.ParseQuantity("10Gi")
+	network, _ := resource.ParseQuantity("128Mi")
 
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -54,17 +54,17 @@ func buildPod(annotations, labels map[string]string) *corev1.Pod {
 					Resources: corev1.ResourceRequirements{
 						Limits: corev1.ResourceList{
 							corev1.ResourceCPU:                 *cpu,
-							corev1.ResourceMemory:              *mem,
-							corev1.ResourceEphemeralStorage:    *disk,
+							corev1.ResourceMemory:              mem,
+							corev1.ResourceEphemeralStorage:    disk,
 							resourceCommon.ResourceNameGpu:     *gpu,
-							resourceCommon.ResourceNameNetwork: *network,
+							resourceCommon.ResourceNameNetwork: network,
 						},
 						Requests: corev1.ResourceList{
 							corev1.ResourceCPU:                 *cpu,
-							corev1.ResourceMemory:              *mem,
-							corev1.ResourceEphemeralStorage:    *disk,
+							corev1.ResourceMemory:              mem,
+							corev1.ResourceEphemeralStorage:    disk,
 							resourceCommon.ResourceNameGpu:     *gpu,
-							resourceCommon.ResourceNameNetwork: *network,
+							resourceCommon.ResourceNameNetwork: network,
 						},
 					},
 					TTY: true,
@@ -171,14 +171,14 @@ func TestParsePod(t *testing.T) {
 		CapacityGroup:          ptr.StringPtr("DEFAULT"),
 		ContainerInfo:          ptr.StringPtr("cinfo"),
 		CPUBurstingEnabled:     ptr.BoolPtr(true),
-		EgressBandwidth:        resourcePtr("10M"),
+		EgressBandwidth:        stringToResourcePtr("10M"),
 		ElasticIPPool:          ptr.StringPtr("pool-1"),
 		ElasticIPs:             ptr.StringPtr("eip-1,eip-2"),
 		FuseEnabled:            ptr.BoolPtr(true),
 		HostnameStyle:          ptr.StringPtr("ec2"),
 		IAMRole:                ptr.StringPtr("arn:aws:iam::0:role/DefaultContainerRole"),
 		IMDSRequireToken:       ptr.StringPtr("require-token"),
-		IngressBandwidth:       resourcePtr("20M"),
+		IngressBandwidth:       stringToResourcePtr("20M"),
 		JobAcceptedTimestampMs: uint64Ptr(1602201163007),
 		JobDescriptor:          ptr.StringPtr("myjobdesc"),
 		JobID:                  ptr.StringPtr("myjobid"),
@@ -195,6 +195,11 @@ func TestParsePod(t *testing.T) {
 		NetworkBurstingEnabled: ptr.BoolPtr(true),
 		OomScoreAdj:            ptr.Int32Ptr(-800),
 		PodSchemaVersion:       uint32Ptr(2),
+		ResourceCPU:            stringToResourcePtr("1"),
+		ResourceDisk:           stringToResourcePtr("10737418240"),
+		ResourceMemory:         stringToResourcePtr("536870912"),
+		ResourceNetwork:        stringToResourcePtr("134217728"),
+		ResourceGPU:            stringToResourcePtr("0"),
 		SchedPolicy:            ptr.StringPtr("batch"),
 		SecurityGroups:         ptr.StringPtr("sg-1,sg-2"),
 		ServiceMeshEnabled:     ptr.BoolPtr(true),
@@ -271,3 +276,4 @@ func TestParsePodInvalid(t *testing.T) {
 }
 
 // XXX: test all nil
+// XXX: test resources when bytes enabled

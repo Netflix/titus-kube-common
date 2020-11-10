@@ -1,8 +1,10 @@
 package pod
 
 import (
+	"errors"
 	"time"
 
+	resourceCommon "github.com/Netflix/titus-kube-common/resource"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -48,6 +50,11 @@ type Config struct {
 	NetworkBurstingEnabled *bool
 	OomScoreAdj            *int32
 	PodSchemaVersion       *uint32
+	ResourceCPU            *resource.Quantity
+	ResourceDisk           *resource.Quantity
+	ResourceGPU            *resource.Quantity
+	ResourceMemory         *resource.Quantity
+	ResourceNetwork        *resource.Quantity
 	SchedPolicy            *string
 	SecurityGroups         *string
 	ServiceMeshEnabled     *bool
@@ -80,13 +87,50 @@ func PodToConfig(pod *corev1.Pod) (*Config, error) {
 	return pConf, err
 }
 
-func parsePodFields(pod *corev1.Pod, pConf *Config) error {
-	firstContainer := pod.Spec.Containers[0]
+func getWorkloadContainer(pod *corev1.Pod, pconf *Config) *corev1.Container {
+	workloadContainer := pod.Spec.Containers[0]
+	if pconf.TaskID == nil {
+		return &workloadContainer
+	}
 
-	if firstContainer.TTY {
+	// Find the container named after the task ID
+	for _, c := range pod.Spec.Containers {
+		if c.Name == *pconf.TaskID {
+			ctrPtr := &c
+			return ctrPtr
+		}
+	}
+
+	return &workloadContainer
+}
+
+func parsePodFields(pod *corev1.Pod, pConf *Config) error {
+	workloadContainer := getWorkloadContainer(pod, pConf)
+	if workloadContainer == nil {
+		return errors.New("could not find workload container in pod")
+	}
+
+	resources := workloadContainer.Resources.Limits
+	pConf.ResourceCPU = resourcePtr(resources, corev1.ResourceCPU)
+	pConf.ResourceMemory = resourcePtr(resources, corev1.ResourceMemory)
+	pConf.ResourceDisk = resourcePtr(resources, corev1.ResourceEphemeralStorage)
+	pConf.ResourceGPU = resourcePtr(resources, resourceCommon.ResourceNameGpu)
+	pConf.ResourceNetwork = resourcePtr(resources, resourceCommon.ResourceNameNetwork)
+	// XXX: do we need the legacy gpu and network resource names, too?
+
+	if workloadContainer.TTY {
 		ttyEnabled := true
 		pConf.TTYEnabled = &ttyEnabled
 	}
 
 	return nil
+}
+
+func resourcePtr(resources corev1.ResourceList, resName corev1.ResourceName) *resource.Quantity {
+	res, ok := resources[resName]
+	if !ok {
+		return nil
+	}
+
+	return &res
 }
