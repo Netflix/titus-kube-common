@@ -16,3 +16,7 @@ fmt: $(GOBIN_TOOL)
 .PHONY: lint
 lint: $(GOBIN_TOOL)
 	$(GOBIN_TOOL) -m -run github.com/golangci/golangci-lint/cmd/golangci-lint run --verbose
+
+# Run tests
+test:
+	go test ./... -coverprofile cover.out
