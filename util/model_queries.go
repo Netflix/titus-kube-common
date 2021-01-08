@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	v12 "github.com/Netflix/titus-controllers-api/api/resourcepool/v1"
+
+	nodeCommon "github.com/Netflix/titus-kube-common/node"
 )
 
 type NodeAndPods struct {
@@ -17,8 +20,8 @@ type NodeAndPods struct {
 	Pods []*v1.Pod
 }
 
-func NodeAge(pod *v1.Node, now time.Time) time.Duration {
-	return now.Sub(pod.CreationTimestamp.Time)
+func NodeAge(node *v1.Node, now time.Time) time.Duration {
+	return now.Sub(node.CreationTimestamp.Time)
 }
 
 func PodAge(pod *v1.Pod, now time.Time) time.Duration {
@@ -96,6 +99,53 @@ func FindTaint(node *v1.Node, taintKey string) *v1.Taint {
 		}
 	}
 	return nil
+}
+
+// A pod may be assigned to multiple resource pools. The first one returned is considered the primary which will
+// be scaled up if more capacity is needed.
+func FindPodAssignedResourcePools(pod *v1.Pod) ([]string, bool) {
+	var poolNames string
+	var ok bool
+	if poolNames, ok = FindLabel(pod.Labels, nodeCommon.LabelKeyResourcePool); !ok {
+		if poolNames, ok = FindLabel(pod.Annotations, nodeCommon.LabelKeyResourcePool); !ok {
+			return []string{}, false
+		}
+	}
+	if poolNames == "" {
+		return []string{}, false
+	}
+	parts := strings.Split(poolNames, ",")
+	var names []string
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if len(trimmed) > 0 {
+			names = append(names, trimmed)
+		}
+	}
+	if len(names) == 0 {
+		return []string{}, false
+	}
+	return names, true
+}
+
+func FindPodPrimaryResourcePool(pod *v1.Pod) (string, bool) {
+	if poolNames, ok := FindPodAssignedResourcePools(pod); ok {
+		return poolNames[0], true
+	}
+	return "", false
+}
+
+// Find all pods for which the given resource pool is primary.
+func FindPodsWithPrimaryResourcePool(resourcePool string, pods []*v1.Pod) []*v1.Pod {
+	var result []*v1.Pod
+	for _, pod := range pods {
+		if primary, ok := FindPodPrimaryResourcePool(pod); ok {
+			if primary == resourcePool {
+				result = append(result, pod)
+			}
+		}
+	}
+	return result
 }
 
 func FindNotScheduledPods(pods []*v1.Pod) []*v1.Pod {

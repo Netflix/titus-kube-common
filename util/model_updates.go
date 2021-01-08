@@ -1,6 +1,7 @@
 package kube
 
 import (
+	"strings"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
@@ -10,6 +11,16 @@ import (
 
 	commonNode "github.com/Netflix/titus-kube-common/node"
 )
+
+func ButPodName(pod *v1.Pod, name string) *v1.Pod {
+	pod.Name = name
+	return pod
+}
+
+func ButPodResourcePools(pod *v1.Pod, resourcePools ...string) *v1.Pod {
+	pod.Labels[commonNode.LabelKeyResourcePool] = strings.Join(resourcePools, ",")
+	return pod
+}
 
 func ButPodAssignedToNode(pod *v1.Pod, node *v1.Node) *v1.Pod {
 	pod.Spec.NodeName = node.Name
@@ -47,7 +58,7 @@ func ButNodeRemovable(node *v1.Node) *v1.Node {
 
 func NewDecommissioningTaint(source string, now time.Time) *v1.Taint {
 	return &v1.Taint{
-		Key: commonNode.TaintKeyNodeDecommissioning,
+		Key:       commonNode.TaintKeyNodeDecommissioning,
 		Value:     source,
 		Effect:    "NoExecute",
 		TimeAdded: &metav1.Time{Time: now},
@@ -56,7 +67,7 @@ func NewDecommissioningTaint(source string, now time.Time) *v1.Taint {
 
 func NewScalingDownTaintWithValue(now time.Time, value string) *v1.Taint {
 	return &v1.Taint{
-		Key: commonNode.TaintKeyNodeScalingDown,
+		Key:       commonNode.TaintKeyNodeScalingDown,
 		Value:     value,
 		Effect:    "NoExecute",
 		TimeAdded: &v12.Time{Time: now},
