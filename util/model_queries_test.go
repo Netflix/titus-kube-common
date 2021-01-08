@@ -56,3 +56,28 @@ func TestSortNodesByAge(t *testing.T) {
 	require.EqualValues(t, now.Add(- 1*time.Hour), sorted[2].CreationTimestamp.Time)
 	require.EqualValues(t, now.Add(- 0*time.Hour), sorted[3].CreationTimestamp.Time)
 }
+
+func TestFindPodAssignedResourcePools(t *testing.T) {
+	pod := ButPodResourcePools(NewRandomNotScheduledPod(), "   poolPrimary  ,   poolSecondary  ")
+	found, ok := FindPodAssignedResourcePools(pod)
+	require.True(t, ok, "no resource pools found")
+	require.True(t, len(found) == 2, "expected two resource pools")
+	require.EqualValues(t, found[0], "poolPrimary")
+	require.EqualValues(t, found[1], "poolSecondary")
+}
+
+func TestFindPodPrimaryResourcePool(t *testing.T) {
+	pod := ButPodResourcePools(NewRandomNotScheduledPod(), "   poolPrimary  ,   poolSecondary  ")
+	found, ok := FindPodPrimaryResourcePool(pod)
+	require.True(t, ok, "no resource pools found")
+	require.EqualValues(t, found, "poolPrimary")
+}
+
+func TestFindPodsWithPrimaryResourcePool(t *testing.T) {
+	pod1 := ButPodResourcePools(NewRandomNotScheduledPod(), "pool1")
+	pod2 := ButPodResourcePools(NewRandomNotScheduledPod(), "pool2")
+
+	found := FindPodsWithPrimaryResourcePool("pool1", []*k8sCore.Pod{pod1, pod2})
+	require.True(t, len(found) == 1, "expected one pod")
+	require.EqualValues(t, found[0].Name, pod1.Name)
+}
