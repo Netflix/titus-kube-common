@@ -8,4 +8,5 @@ const (
 	LabelKeyRemovable       = "node.titus.netflix.com/removable"
 	LabelKeyResourcePool    = "scaler.titus.netflix.com/resource-pool"
 	LabelKeyTerminating     = "node.titus.netflix.com/terminating"
+	LabelKeyInstanceType    = "node.kubernetes.io/instance-type"
 )
