@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/go-logr/logr"
 	k8sCore "k8s.io/api/core/v1"
 	ctrlClient "sigs.k8s.io/controller-runtime/pkg/client"
-	"time"
 
 	poolV1 "github.com/Netflix/titus-controllers-api/api/resourcepool/v1"
 	commonUtil "github.com/Netflix/titus-kube-common/util"
@@ -24,8 +25,10 @@ type ResourceSnapshot struct {
 	Machines     []*poolV1.MachineTypeConfig
 	Nodes        []*k8sCore.Node
 	Pods         []*k8sCore.Pod
+	// Pods with the primary resource pool being this one
+	PrimaryPods []*k8sCore.Pod
 	// Helper data structures
-	nodesById map[string]*k8sCore.Node
+	nodesByID map[string]*k8sCore.Node
 }
 
 func NewResourceSnapshot(client ctrlClient.Client, resourcePoolName string,
@@ -145,10 +148,10 @@ func (snapshot *ResourceSnapshot) AdjustResourcePoolSize(resourceCount int64) er
 	return nil
 }
 
-func (snapshot *ResourceSnapshot) UpdateNode(nodeId string, transformer func(*k8sCore.Node)) error {
-	node, ok := snapshot.nodesById[nodeId]
+func (snapshot *ResourceSnapshot) UpdateNode(nodeID string, transformer func(*k8sCore.Node)) error {
+	node, ok := snapshot.nodesByID[nodeID]
 	if !ok {
-		return fmt.Errorf("resource pool does not include node %s", nodeId)
+		return fmt.Errorf("resource pool does not include node %s", nodeID)
 	}
 
 	patch := ctrlClient.MergeFrom(node.DeepCopy())
@@ -161,7 +164,8 @@ func (snapshot *ResourceSnapshot) UpdateNode(nodeId string, transformer func(*k8
 
 func (snapshot *ResourceSnapshot) ReloadResourcePool() error {
 	resourcePool := poolV1.ResourcePoolConfig{}
-	err := snapshot.client.Get(context.TODO(), ctrlClient.ObjectKey{Namespace: "default", Name: snapshot.ResourcePoolName}, &resourcePool)
+	err := snapshot.client.Get(context.TODO(),
+		ctrlClient.ObjectKey{Namespace: "default", Name: snapshot.ResourcePoolName}, &resourcePool)
 	if err != nil {
 		return fmt.Errorf("cannot read resource pool CRD: %s", snapshot.ResourcePoolName)
 	}
@@ -191,17 +195,17 @@ func (snapshot *ResourceSnapshot) ReloadNodes() error {
 	}
 
 	var nodes []*k8sCore.Node
-	nodesById := map[string]*k8sCore.Node{}
+	nodesByID := map[string]*k8sCore.Node{}
 	for _, node := range nodeList.Items {
 		if commonUtil.NodeBelongsToResourcePool(&node, &snapshot.ResourcePool.Spec) {
 			tmp := node
 			nodes = append(nodes, &tmp)
-			nodesById[node.Name] = &tmp
+			nodesByID[node.Name] = &tmp
 		}
 	}
 
 	snapshot.Nodes = nodes
-	snapshot.nodesById = nodesById
+	snapshot.nodesByID = nodesByID
 
 	return nil
 }
@@ -221,6 +225,7 @@ func (snapshot *ResourceSnapshot) ReloadPods() error {
 	}
 
 	snapshot.Pods = pods
+	snapshot.PrimaryPods = commonUtil.FindPodsWithPrimaryResourcePool(snapshot.ResourcePoolName, pods)
 
 	return nil
 }
@@ -238,7 +243,7 @@ func formatResourceSnapshotCompact(snapshot *ResourceSnapshot) string {
 		NotProvisionedNodeCount: snapshot.NotProvisionedCount(),
 		OnWayOutNodeCount:       snapshot.OnWayOutNodeCount(),
 	}
-	return commonUtil.ToJsonString(value)
+	return commonUtil.ToJSONString(value)
 }
 
 func formatResourceSnapshotEssentials(snapshot *ResourceSnapshot) string {
@@ -260,5 +265,5 @@ func formatResourceSnapshotEssentials(snapshot *ResourceSnapshot) string {
 		NotProvisionedResources: snapshot.NotProvisionedCapacity(),
 		OnWayOutResources:       snapshot.OnWayOutCapacity(),
 	}
-	return commonUtil.ToJsonString(value)
+	return commonUtil.ToJSONString(value)
 }

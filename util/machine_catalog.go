@@ -3,7 +3,7 @@ package kube
 import (
 	v12 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/Netflix/titus-controllers-api/api/resourcepool/v1"
+	v1 "github.com/Netflix/titus-controllers-api/api/resourcepool/v1"
 )
 
 // We use functions, as K8S records are mutable

@@ -3,10 +3,11 @@ package kube
 // Data structures and functions for pretty formatting resource pools, nodes, pods, machine types, etc.
 
 import (
+	"time"
+
 	poolV1 "github.com/Netflix/titus-controllers-api/api/resourcepool/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/json"
-	"time"
 )
 
 const (
@@ -27,7 +28,7 @@ func FormatResourcePool(resourcePool *poolV1.ResourcePoolConfig, options Formatt
 	} else if options.Level == FormatEssentials {
 		return formatResourcePoolEssentials(resourcePool)
 	} else if options.Level == FormatDetails {
-		return ToJsonString(resourcePool)
+		return ToJSONString(resourcePool)
 	}
 	return formatResourcePoolCompact(resourcePool)
 }
@@ -36,7 +37,7 @@ func FormatMachineType(machineType *poolV1.MachineTypeConfig, options FormatterO
 	if options.Level != FormatDetails {
 		return formatMachineTypeCompact(machineType)
 	}
-	return ToJsonString(machineType)
+	return ToJSONString(machineType)
 }
 
 func FormatNode(node *v1.Node, ageThreshold time.Duration, options FormatterOptions) string {
@@ -45,7 +46,7 @@ func FormatNode(node *v1.Node, ageThreshold time.Duration, options FormatterOpti
 	} else if options.Level == FormatEssentials {
 		return formatNodeEssentials(node, ageThreshold)
 	} else if options.Level == FormatDetails {
-		return ToJsonString(node)
+		return ToJSONString(node)
 	}
 	return formatNodeCompact(node, ageThreshold)
 }
@@ -56,7 +57,7 @@ func FormatPod(pod *v1.Pod, options FormatterOptions) string {
 	} else if options.Level == FormatEssentials {
 		return formatPodEssentials(pod)
 	} else if options.Level == FormatDetails {
-		return ToJsonString(pod)
+		return ToJSONString(pod)
 	}
 	return formatPodCompact(pod)
 }
@@ -72,7 +73,7 @@ func formatResourcePoolCompact(pool *poolV1.ResourcePoolConfig) string {
 		ResourceCount:      pool.Spec.ResourceCount,
 		AutoScalingEnabled: pool.Spec.ScalingRules.AutoScalingEnabled,
 	}
-	return ToJsonString(value)
+	return ToJSONString(value)
 }
 
 func formatResourcePoolEssentials(pool *poolV1.ResourcePoolConfig) string {
@@ -88,7 +89,7 @@ func formatResourcePoolEssentials(pool *poolV1.ResourcePoolConfig) string {
 		ResourceShape:      pool.Spec.ResourceShape.ComputeResource,
 		AutoScalingEnabled: pool.Spec.ScalingRules.AutoScalingEnabled,
 	}
-	return ToJsonString(value)
+	return ToJSONString(value)
 }
 
 func formatMachineTypeCompact(machineType *poolV1.MachineTypeConfig) string {
@@ -100,7 +101,7 @@ func formatMachineTypeCompact(machineType *poolV1.MachineTypeConfig) string {
 		Name:            machineType.Name,
 		ComputeResource: machineType.Spec.ComputeResource,
 	}
-	return ToJsonString(value)
+	return ToJSONString(value)
 }
 
 func formatNodeCompact(node *v1.Node, ageThreshold time.Duration) string {
@@ -114,7 +115,7 @@ func formatNodeCompact(node *v1.Node, ageThreshold time.Duration) string {
 		Up:       IsNodeAvailableForScheduling(node, time.Now(), ageThreshold),
 		OnWayOut: IsNodeOnItsWayOut(node),
 	}
-	return ToJsonString(value)
+	return ToJSONString(value)
 }
 
 func formatNodeEssentials(node *v1.Node, ageThreshold time.Duration) string {
@@ -130,7 +131,7 @@ func formatNodeEssentials(node *v1.Node, ageThreshold time.Duration) string {
 		OnWayOut:           IsNodeOnItsWayOut(node),
 		AvailableResources: FromNodeToComputeResource(node),
 	}
-	return ToJsonString(value)
+	return ToJSONString(value)
 }
 
 func formatPodCompact(pod *v1.Pod) string {
@@ -144,7 +145,7 @@ func formatPodCompact(pod *v1.Pod) string {
 		State: toPodState(pod),
 		Node:  pod.Spec.NodeName,
 	}
-	return ToJsonString(value)
+	return ToJSONString(value)
 }
 
 func formatPodEssentials(pod *v1.Pod) string {
@@ -160,7 +161,7 @@ func formatPodEssentials(pod *v1.Pod) string {
 		Node:             pod.Spec.NodeName,
 		ComputeResources: FromPodToComputeResource(pod),
 	}
-	return ToJsonString(value)
+	return ToJSONString(value)
 }
 
 func toPodState(pod *v1.Pod) string {
@@ -173,7 +174,7 @@ func toPodState(pod *v1.Pod) string {
 	return "notScheduled"
 }
 
-func ToJsonString(value interface{}) string {
+func ToJSONString(value interface{}) string {
 	bytes, err := json.Marshal(value)
 	if err != nil {
 		return "<formatting error>"
