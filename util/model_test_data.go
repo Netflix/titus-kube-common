@@ -2,8 +2,9 @@ package kube
 
 import (
 	"fmt"
-	"github.com/Netflix/titus-kube-common/node"
 	"time"
+
+	"github.com/Netflix/titus-kube-common/node"
 
 	"github.com/google/uuid"
 

@@ -24,7 +24,8 @@ func TestFormatResourcePoolEssentials(t *testing.T) {
 		FormatterOptions{Level: FormatEssentials},
 	)
 	require.EqualValues(t,
-		"{\"Name\":\"unitTestPool\",\"ResourceCount\":1,\"ResourceShape\":{\"cpu\":24,\"gpu\":0,\"memoryMB\":196608,\"diskMB\":384000,\"networkMBPS\":6250},\"AutoScalingEnabled\":true}",
+		"{\"Name\":\"unitTestPool\",\"ResourceCount\":1,\"ResourceShape\":{\"cpu\":24,\"gpu\":0," +
+		"\"memoryMB\":196608,\"diskMB\":384000,\"networkMBPS\":6250},\"AutoScalingEnabled\":true}",
 		text,
 	)
 }
@@ -35,7 +36,8 @@ func TestFormatMachineTypeCompact(t *testing.T) {
 		FormatterOptions{Level: FormatCompact},
 	)
 	require.EqualValues(t,
-		"{\"Name\":\"r5.metal\",\"ComputeResource\":{\"cpu\":96,\"gpu\":0,\"memoryMB\":786432,\"diskMB\":1536000,\"networkMBPS\":25000}}",
+		"{\"Name\":\"r5.metal\",\"ComputeResource\":{\"cpu\":96,\"gpu\":0," +
+		"\"memoryMB\":786432,\"diskMB\":1536000,\"networkMBPS\":25000}}",
 		text,
 	)
 }
@@ -59,7 +61,8 @@ func TestFormatNodeEssentials(t *testing.T) {
 		FormatterOptions{Level: FormatEssentials},
 	)
 	require.EqualValues(t,
-		"{\"Name\":\"junitNode\",\"Up\":true,\"OnWayOut\":false,\"AvailableResources\":{\"cpu\":96,\"gpu\":0,\"memoryMB\":786432,\"diskMB\":1536000,\"networkMBPS\":25000}}",
+		"{\"Name\":\"junitNode\",\"Up\":true,\"OnWayOut\":false,\"AvailableResources\":{\"cpu\":96,\"gpu\":0," +
+		"\"memoryMB\":786432,\"diskMB\":1536000,\"networkMBPS\":25000}}",
 		text,
 	)
 }
@@ -77,11 +80,13 @@ func TestFormatPodCompact(t *testing.T) {
 
 func TestFormatPodEssentials(t *testing.T) {
 	text := FormatPod(
-		ButPodRunningOnNode(ButPodName(NewRandomNotScheduledPod(), "testPod"), NewNode("junitNode", "testResourcePool", R5Metal())),
+		ButPodRunningOnNode(ButPodName(NewRandomNotScheduledPod(), "testPod"),
+			NewNode("junitNode", "testResourcePool", R5Metal())),
 		FormatterOptions{Level: FormatEssentials},
 	)
 	require.EqualValues(t,
-		"{\"Name\":\"testPod\",\"State\":\"running\",\"Node\":\"junitNode\",\"ComputeResources\":{\"cpu\":24,\"gpu\":0,\"memoryMB\":196608,\"diskMB\":384000,\"networkMBPS\":6250}}",
+		"{\"Name\":\"testPod\",\"State\":\"running\",\"Node\":\"junitNode\"," +
+		"\"ComputeResources\":{\"cpu\":24,\"gpu\":0,\"memoryMB\":196608,\"diskMB\":384000,\"networkMBPS\":6250}}",
 		text,
 	)
 }

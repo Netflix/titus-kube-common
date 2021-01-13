@@ -116,17 +116,27 @@ func PodBelongsToResourcePool(pod *v1.Pod, resourcePool *v12.ResourcePoolSpec, n
 			}
 		}
 	}
-	if HasLabelAndValue(pod.Labels, nodeCommon.LabelKeyResourcePool, resourcePool.Name) {
-		return true
+	assignedPools, ok := FindPodAssignedResourcePools(pod)
+	if !ok {
+		return false
 	}
-	if HasLabelAndValue(pod.Annotations, nodeCommon.LabelKeyResourcePool, resourcePool.Name) {
-		return true
-	}
-	for _, node := range nodes {
-		if node.Name == pod.Spec.NodeName {
-			return true
+
+	for _, pool := range assignedPools {
+		if pool == resourcePool.Name {
+			// If the pod is not assigned to any node, we stop at this point.
+			if pod.Spec.NodeName == "" {
+				return true
+			}
+			// If the pod is assigned to a node, we check that the node itself belongs to the same resource pool.
+			for _, node := range nodes {
+				if NodeBelongsToResourcePool(node, resourcePool) && node.Name == pod.Spec.NodeName {
+					return true
+				}
+			}
+			return false
 		}
 	}
+
 	return false
 }
 
