@@ -3,7 +3,7 @@ package pod
 const (
 	AnnotationKeyInstanceType = "node.titus.netflix.com/itype"
 	AnnotationKeyRegion       = "node.titus.netflix.com/region"
-	AnnotationKeyZone         = "node.titus.netflix.com/zone"
+	AnnotationKeyStack        = "node.titus.netflix.com/stack"
 
 	// Pod Networking
 	AnnotationKeyEgressBandwidth  = "kubernetes.io/egress-bandwidth"
