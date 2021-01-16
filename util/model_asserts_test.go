@@ -1,10 +1,11 @@
 package kube
 
 import (
+	"testing"
+
 	nodeCommon "github.com/Netflix/titus-kube-common/node"
 	"github.com/stretchr/testify/require"
 	k8sCore "k8s.io/api/core/v1"
-	"testing"
 )
 
 func TestNotScheduledPodBelongsToResourcePool(t *testing.T) {
