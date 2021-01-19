@@ -112,9 +112,9 @@ func parsePodFields(pod *corev1.Pod, pConf *Config) error {
 
 	resources := workloadContainer.Resources.Limits
 	pConf.ResourceCPU = resourcePtr(resources, corev1.ResourceCPU)
-	pConf.ResourceMemory = resourcePtr(resources, corev1.ResourceMemory)
 	pConf.ResourceDisk = resourcePtr(resources, corev1.ResourceEphemeralStorage)
 	pConf.ResourceGPU = resourcePtr(resources, resourceCommon.ResourceNameGpu)
+	pConf.ResourceMemory = resourcePtr(resources, corev1.ResourceMemory)
 	pConf.ResourceNetwork = resourcePtr(resources, resourceCommon.ResourceNameNetwork)
 	// XXX: do we need the legacy gpu and network resource names, too?
 

@@ -41,6 +41,7 @@ const (
 	AnnotationKeyAllocationIdx = "network.titus.netflix.com/allocation-idx"
 
 	// Security
+
 	// matches kube2iam
 	AnnotationKeyIAMRole              = "iam.amazonaws.com/role"
 	AnnotationKeySecurityGroupsLegacy = "network.titus.netflix.com/securityGroups"
@@ -397,4 +398,21 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 	}
 
 	return err.ErrorOrNil()
+}
+
+// PodSchemaVersion returns the pod schema version used to create a pod.
+// If unset, returns 0
+func PodSchemaVersion(pod *corev1.Pod) (uint32, error) {
+	defaultVal := uint32(0)
+	val, ok := pod.GetAnnotations()[AnnotationKeyPodSchemaVersion]
+	if !ok {
+		return defaultVal, nil
+	}
+
+	parsedVal, err := strconv.ParseUint(val, 10, 32)
+	if err != nil {
+		return defaultVal, fmt.Errorf("annotation is not a valid uint32 value: %s", AnnotationKeyPodSchemaVersion)
+	}
+
+	return uint32(parsedVal), nil
 }
