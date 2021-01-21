@@ -32,6 +32,25 @@ const (
 	LabelKeyCapacityGroup = "titus.netflix.com/capacity-group"
 )
 
+func extractStringLabel(pod *corev1.Pod, label string) (string, error) {
+	value, ok := pod.GetLabels()[label]
+	if !ok {
+		return "", fmt.Errorf("pod doesn't contain label %s", label)
+	}
+
+	return value, nil
+}
+
+// JobID returns the Titus Job ID value from the labels of a pod
+func JobID(pod *corev1.Pod) (string, error) {
+	return extractStringLabel(pod, LabelKeyJobId)
+}
+
+// TaskID returns the Titus Task ID value from the labels of a pod
+func TaskID(pod *corev1.Pod) (string, error) {
+	return extractStringLabel(pod, LabelKeyTaskId)
+}
+
 // Is the control plane indicating that it's sending the resources in bytes?
 func ByteUnitsEnabled(pod *corev1.Pod) (bool, error) {
 	bytesEnabled, ok := pod.GetLabels()[LabelKeyByteUnitsEnabled]
