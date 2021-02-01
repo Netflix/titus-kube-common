@@ -12,5 +12,4 @@ const (
 	AnnotationKeyRegion         = "node.titus.netflix.com/region"
 	AnnotationKeyZone           = "node.titus.netflix.com/zone"
 	AnnotationKeyStack          = "node.titus.netflix.com/stack"
-	AnnotationKeyMutableBuild   = "node.titus.netflix.com/mutable-build"
 )
