@@ -37,6 +37,8 @@ metadata:
     security.netflix.com/app-metadata-sig: <Metatron app signature>
     # matches kube2iam:
     iam.amazonaws.com/role: arn:aws:iam::<account id>:role/<role>
+    # AppArmor: https://kubernetes.io/docs/tutorials/clusters/apparmor/#securing-a-pod
+    container.apparmor.security.beta.kubernetes.io/46b59bd7-3d02-42c3-951e-cdbaa60f66e2: "localhost/docker_titus"
 
     # opportunistic resources (see control-plane and scheduler code)
 
@@ -122,9 +124,11 @@ spec:
       capabilities:
         add: ["SYS_ADMIN"]
         drop: ["NET_RAW"]
+      # https://kubernetes.io/docs/tutorials/clusters/seccomp/#create-a-pod-with-a-seccomp-profile-for-syscall-auditing
+      # This is only supported in k8s 1.19+
       seccompProfile:
         type: Localhost
-        localhostProfile: my-profiles/profile-allow.json
+        localhostProfile: default.json
       sysctls:
       - name: net.ipv4.conf.all.accept_local
         value: "1"
