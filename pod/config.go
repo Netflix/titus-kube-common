@@ -2,6 +2,7 @@ package pod
 
 import (
 	"errors"
+	"regexp"
 	"time"
 
 	resourceCommon "github.com/Netflix/titus-kube-common/resource"
@@ -15,6 +16,7 @@ import (
 type Config struct {
 	AssignIPv6Address      *bool
 	AccountID              *string
+	AppArmorProfile        *string
 	AppDetail              *string
 	AppName                *string
 	AppMetadata            *string
@@ -43,6 +45,7 @@ type Config struct {
 	LogKeepLocalFile       *bool
 	LogUploadCheckInterval *time.Duration
 	LogUploadThresholdTime *time.Duration
+	LogUploadRegExp        *regexp.Regexp
 	LogStdioCheckInterval  *time.Duration
 	LogS3WriterIAMRole     *string
 	LogS3BucketName        *string
@@ -56,7 +59,7 @@ type Config struct {
 	ResourceMemory         *resource.Quantity
 	ResourceNetwork        *resource.Quantity
 	SchedPolicy            *string
-	SecurityGroups         *string
+	SecurityGroupIDs       *[]string
 	ServiceMeshEnabled     *bool
 	ServiceMeshImage       *string
 	StaticIPAllocation     *string

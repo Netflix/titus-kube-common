@@ -37,7 +37,7 @@ func buildPod(annotations, labels map[string]string) *corev1.Pod {
 	gpu := resource.NewQuantity(0, resource.DecimalSI)
 	mem, _ := resource.ParseQuantity("512Mi")
 	disk, _ := resource.ParseQuantity("10Gi")
-	network, _ := resource.ParseQuantity("128Mi")
+	network, _ := resource.ParseQuantity("128M")
 
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -77,24 +77,27 @@ func buildPod(annotations, labels map[string]string) *corev1.Pod {
 }
 
 func TestParsePod(t *testing.T) {
+	taskId := "task-id-in-container"
 	annotations := map[string]string{
 		// strings
-		AnnotationKeyAppDetail:             "mydetail",
-		AnnotationKeyAppName:               "myapp",
-		AnnotationKeyAppOwnerEmail:         "test@example.com",
-		AnnotationKeyAppSequence:           "v000",
-		AnnotationKeyAppStack:              "mystack",
-		AnnotationKeyIAMRole:               "arn:aws:iam::0:role/DefaultContainerRole",
-		AnnotationKeyJobID:                 "myjobid",
-		AnnotationKeyJobType:               "BATCH",
-		AnnotationKeyJobDescriptor:         "myjobdesc",
-		AnnotationKeyPodTitusContainerInfo: "cinfo",
+		AnnotationKeyPrefixAppArmor + "/" + taskId: "localhost/docker_titus",
+		AnnotationKeyAppDetail:                     "mydetail",
+		AnnotationKeyAppName:                       "myapp",
+		AnnotationKeyAppOwnerEmail:                 "test@example.com",
+		AnnotationKeyAppSequence:                   "v000",
+		AnnotationKeyAppStack:                      "mystack",
+		AnnotationKeyIAMRole:                       "arn:aws:iam::0:role/DefaultContainerRole",
+		AnnotationKeyJobID:                         "myjobid",
+		AnnotationKeyJobType:                       "BATCH",
+		AnnotationKeyJobDescriptor:                 "myjobdesc",
+		AnnotationKeyPodTitusContainerInfo:         "cinfo",
 
-		AnnotationKeyNetworkAccountID:          "123456",
-		AnnotationKeyNetworkElasticIPPool:      "pool-1",
-		AnnotationKeyNetworkElasticIPs:         "eip-1,eip-2",
-		AnnotationKeyNetworkIMDSRequireToken:   "require-token",
-		AnnotationKeyNetworkSecurityGroups:     "sg-1,sg-2",
+		AnnotationKeyNetworkAccountID:        "123456",
+		AnnotationKeyNetworkElasticIPPool:    "pool-1",
+		AnnotationKeyNetworkElasticIPs:       "eip-1,eip-2",
+		AnnotationKeyNetworkIMDSRequireToken: "require-token",
+		// Spaces intentionally added: we need to trim these
+		AnnotationKeyNetworkSecurityGroups:     "sg-1 , sg-2 ",
 		AnnotationKeyNetworkStaticIPAllocation: "static-ip-alloc",
 		AnnotationKeyNetworkSubnetIDs:          "subnet-1,subnet-2",
 
@@ -156,8 +159,9 @@ func TestParsePod(t *testing.T) {
 	pod := buildPod(annotations, labels)
 	conf, err := PodToConfig(pod)
 	assert.NilError(t, err)
-
+	sgIDs := []string{"sg-1", "sg-2"}
 	expConf := Config{
+		AppArmorProfile:        ptr.StringPtr("localhost/docker_titus"),
 		AccountID:              ptr.StringPtr("123456"),
 		AppDetail:              ptr.StringPtr("mydetail"),
 		AppMetadata:            ptr.StringPtr("app-metadata"),
@@ -198,10 +202,10 @@ func TestParsePod(t *testing.T) {
 		ResourceCPU:            stringToResourcePtr("1"),
 		ResourceDisk:           stringToResourcePtr("10737418240"),
 		ResourceMemory:         stringToResourcePtr("536870912"),
-		ResourceNetwork:        stringToResourcePtr("134217728"),
+		ResourceNetwork:        stringToResourcePtr("128M"),
 		ResourceGPU:            stringToResourcePtr("0"),
 		SchedPolicy:            ptr.StringPtr("batch"),
-		SecurityGroups:         ptr.StringPtr("sg-1,sg-2"),
+		SecurityGroupIDs:       &sgIDs,
 		ServiceMeshEnabled:     ptr.BoolPtr(true),
 		ServiceMeshImage:       ptr.StringPtr("titusoss/service-mesh"),
 		StaticIPAllocation:     ptr.StringPtr("static-ip-alloc"),
@@ -273,6 +277,21 @@ func TestParsePodInvalid(t *testing.T) {
 	})
 	_, err := PodToConfig(pod)
 	assert.ErrorContains(t, err, "label is not a valid boolean value: "+LabelKeyByteUnitsEnabled)
+}
+
+func TestLogUploadRegExp(t *testing.T) {
+	// You can't DeepEqual regexps, so test it separately
+	annotations := map[string]string{
+		AnnotationKeyLogUploadRegexp: ".*.foo",
+	}
+	labels := map[string]string{}
+
+	pod := buildPod(annotations, labels)
+	conf, err := PodToConfig(pod)
+	assert.NilError(t, err)
+
+	assert.Assert(t, conf.LogUploadRegExp != nil)
+	assert.Equal(t, conf.LogUploadRegExp.String(), ".*.foo")
 }
 
 // XXX: test all nil

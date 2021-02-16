@@ -2,7 +2,9 @@ package pod
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	multierror "github.com/hashicorp/go-multierror"
@@ -46,6 +48,8 @@ const (
 	// matches kube2iam
 	AnnotationKeyIAMRole              = "iam.amazonaws.com/role"
 	AnnotationKeySecurityGroupsLegacy = "network.titus.netflix.com/securityGroups"
+	// https://kubernetes.io/docs/tutorials/clusters/apparmor/#securing-a-pod
+	AnnotationKeyPrefixAppArmor = "container.apparmor.security.beta.kubernetes.io"
 
 	//
 	// v1 pod spec annotations
@@ -138,6 +142,7 @@ const (
 	AnnotationKeyLogStdioCheckInterval  = "log.netflix.com/stdio-check-interval"
 	AnnotationKeyLogUploadThresholdTime = "log.netflix.com/upload-threshold-time"
 	AnnotationKeyLogUploadCheckInterval = "log.netflix.com/upload-check-interval"
+	AnnotationKeyLogUploadRegexp        = "log.netflix.com/upload-regexp"
 
 	// service configuration
 
@@ -147,6 +152,8 @@ const (
 
 func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 	annotations := pod.GetAnnotations()
+	userCtr := GetUserContainer(pod)
+
 	boolAnnotations := []struct {
 		key   string
 		field **bool
@@ -222,6 +229,10 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		field **string
 	}{
 		{
+			key:   AnnotationKeyPrefixAppArmor + "/" + userCtr.Name,
+			field: &pConf.AppArmorProfile,
+		},
+		{
 			key:   AnnotationKeyAppDetail,
 			field: &pConf.AppDetail,
 		},
@@ -284,10 +295,6 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		{
 			key:   AnnotationKeyNetworkIMDSRequireToken,
 			field: &pConf.IMDSRequireToken,
-		},
-		{
-			key:   AnnotationKeyNetworkSecurityGroups,
-			field: &pConf.SecurityGroups,
 		},
 		{
 			key:   AnnotationKeyNetworkStaticIPAllocation,
@@ -404,6 +411,24 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 				err = multierror.Append(err, fmt.Errorf("annotation is not a valid duration value: %s", an.key))
 			}
 		}
+	}
+
+	if uploadRegexpVal, ok := annotations[AnnotationKeyLogUploadRegexp]; ok {
+		uploadRegexp, pErr := regexp.Compile(uploadRegexpVal)
+		if pErr == nil {
+			pConf.LogUploadRegExp = uploadRegexp
+		} else {
+			err = multierror.Append(err, fmt.Errorf("annotation is not a valid regexp value: %s: %w", AnnotationKeyLogUploadRegexp, pErr))
+		}
+	}
+
+	if sgVal, ok := annotations[AnnotationKeyNetworkSecurityGroups]; ok {
+		sgsSplit := strings.Split(strings.TrimSpace(sgVal), ",")
+		sgIDs := []string{}
+		for _, sg := range sgsSplit {
+			sgIDs = append(sgIDs, strings.TrimSpace(sg))
+		}
+		pConf.SecurityGroupIDs = &sgIDs
 	}
 
 	return err.ErrorOrNil()
