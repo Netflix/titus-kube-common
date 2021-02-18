@@ -158,6 +158,7 @@ spec:
       # URL for the NFS server
       server: fs-abcdef.efs.us-east-1.amazonaws.com
       path: /subdir1
+      readOnly: true
 
   # shm - see the k8s emptyDir docs
   - name: dev-shm
