@@ -21,9 +21,6 @@ const (
 	// Pod Networking
 	AnnotationKeyEgressBandwidth  = "kubernetes.io/egress-bandwidth"
 	AnnotationKeyIngressBandwidth = "kubernetes.io/ingress-bandwidth"
-	AnnotationKeySecurityGroups   = "network.titus.netflix.com/securityGroups"
-	AnnotationKeySubnets          = "network.titus.netflix.com/subnets"
-	AnnotationKeyAccountID        = "network.titus.netflix.com/accountId"
 
 	// Pod ENI
 	AnnotationKeyIPv4Address      = "network.netflix.com/address-ipv4"
@@ -77,6 +74,8 @@ const (
 
 	// networking - used by the Titus CNI
 
+	AnnotationKeySubnetsLegacy             = "network.titus.netflix.com/subnets"
+	AnnotationKeyAccountIDLegacy           = "network.titus.netflix.com/accountId"
 	AnnotationKeyNetworkAccountID          = "network.netflix.com/account-id"
 	AnnotationKeyNetworkBurstingEnabled    = "network.netflix.com/network-bursting-enabled"
 	AnnotationKeyNetworkAssignIPv6Address  = "network.netflix.com/assign-ipv6-address"
@@ -87,7 +86,6 @@ const (
 	AnnotationKeyNetworkSecurityGroups     = "network.netflix.com/security-groups"
 	AnnotationKeyNetworkSubnetIDs          = "network.netflix.com/subnet-ids"
 	// TODO: deprecate this in favor of using the UUID annotation below
-	AnnotationKeyNetworkStaticIPAllocation     = "network.netflix.com/static-ip-allocation"
 	AnnotationKeyNetworkStaticIPAllocationUUID = "network.netflix.com/static-ip-allocation-uuid"
 
 	// storage
@@ -306,8 +304,8 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			field: &pConf.IMDSRequireToken,
 		},
 		{
-			key:   AnnotationKeyNetworkStaticIPAllocation,
-			field: &pConf.StaticIPAllocation,
+			key:   AnnotationKeyNetworkStaticIPAllocationUUID,
+			field: &pConf.StaticIPAllocationUUID,
 		},
 		{
 			key:   AnnotationKeyNetworkSubnetIDs,
