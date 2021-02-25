@@ -14,6 +14,7 @@ const (
 	AnnotationKeyInstanceType = "node.titus.netflix.com/itype"
 	AnnotationKeyRegion       = "node.titus.netflix.com/region"
 	AnnotationKeyStack        = "node.titus.netflix.com/stack"
+	AnnotationKeyAZ           = "failure-domain.beta.kubernetes.io/zone"
 
 	// Pod Networking
 	AnnotationKeyEgressBandwidth  = "kubernetes.io/egress-bandwidth"
@@ -81,7 +82,9 @@ const (
 	AnnotationKeyNetworkJumboFramesEnabled = "network.netflix.com/jumbo-frames-enabled"
 	AnnotationKeyNetworkSecurityGroups     = "network.netflix.com/security-groups"
 	AnnotationKeyNetworkSubnetIDs          = "network.netflix.com/subnet-ids"
-	AnnotationKeyNetworkStaticIPAllocation = "network.netflix.com/static-ip-allocation"
+	// TODO: deprecate this in favor of using the UUID annotation below
+	AnnotationKeyNetworkStaticIPAllocation     = "network.netflix.com/static-ip-allocation"
+	AnnotationKeyNetworkStaticIPAllocationUUID = "network.netflix.com/static-ip-allocation-uuid"
 
 	// security
 
