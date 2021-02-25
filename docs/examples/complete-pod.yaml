@@ -73,10 +73,12 @@ metadata:
     log.netflix.com/upload-check-interval: "1h"
     log.netflix.com/upload-regexp: ".*.log"
 
-    # agent passthrough parameters: see below for the full list
+    # valid values: batch, idle
     pod.netflix.com/sched-policy: "batch"
     pod.netflix.com/oom-score-adj: 1000
     pod.netflix.com/cpu-bursting-enabled: "true"
+    pod.netflix.com/seccomp-agent-net-enabled: "true"
+    pod.netflix.com/seccomp-agent-perf-enabled: "true"
 
   creationTimestamp: "2020-04-14T20:24:58Z"
   labels:
