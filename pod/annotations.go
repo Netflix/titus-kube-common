@@ -86,6 +86,12 @@ const (
 	AnnotationKeyNetworkStaticIPAllocation     = "network.netflix.com/static-ip-allocation"
 	AnnotationKeyNetworkStaticIPAllocationUUID = "network.netflix.com/static-ip-allocation-uuid"
 
+	// storage
+	AnnotationKeyStorageEBSVolumeID  = "ebs.volume.netflix.com/volume-id"
+	AnnotationKeyStorageEBSMountPath = "ebs.volume.netflix.com/mount-path"
+	AnnotationKeyStorageEBSMountPerm = "ebs.volume.netflix.com/mount-perm"
+	AnnotationKeyStorageEBSFSType    = "ebs.volume.netflix.com/fs-type"
+
 	// security
 
 	AnnotationKeySecurityAppMetadata    = "security.netflix.com/app-metadata"
