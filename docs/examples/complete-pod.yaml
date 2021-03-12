@@ -80,12 +80,14 @@ metadata:
     pod.netflix.com/seccomp-agent-net-enabled: "true"
     pod.netflix.com/seccomp-agent-perf-enabled: "true"
 
+    service.netflix.com/service-mesh.v2.enabled: "true"
+
   creationTimestamp: "2020-04-14T20:24:58Z"
   labels:
     # These should match the annotations above
     v3.job.titus.netflix.com/job-id: "a318b9eb-50bf-4927-a9eb-b3d5a757f364"
     v3.job.titus.netflix.com/task-id: "46b59bd7-3d02-42c3-951e-cdbaa60f66e2"
-    workload.netflix.com/name: helloworld  // TODO: sync w/ Kimmy
+    workload.netflix.com/name: helloworld
     workload.netflix.com/stack: teststack
     workload.netflix.com/detail: testdetail
     workload.netflix.com/sequence: v001
@@ -96,7 +98,7 @@ spec:
   containers:
   - image: <registry URL>/titusops/nodehelloworld@sha256:<sha digest>
     imagePullPolicy: IfNotPresent
-	name: "46b59bd7-3d02-42c3-951e-cdbaa60f66e2"
+    name: "46b59bd7-3d02-42c3-951e-cdbaa60f66e2"
     resources:
       limits:
         cpu: "1"
