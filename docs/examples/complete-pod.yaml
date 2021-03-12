@@ -4,7 +4,7 @@ metadata:
   annotations:
     # general
 
-    pod.netflix.com/pod-schema-version: 1
+    pod.netflix.com/pod-schema-version: "1"
 
     # The currently running workload - could be an app in Spinnaker
     # or launched through a batch system
@@ -14,12 +14,12 @@ metadata:
     workload.netflix.com/sequence: v001
     workload.netflix.com/owner-email: myuser@netflix.com
     # Titus-specific fields
-    v3.job.titus.netflix.com/accepted-timestamp-ms: <timestamp>
+    v3.job.titus.netflix.com/accepted-timestamp-ms: "1615574101371"
     v3.job.titus.netflix.com/id: "a318b9eb-50bf-4927-a9eb-b3d5a757f364"
     v3.job.titus.netflix.com/type: SERVICE
     # to be removed once VK supports the full pod spec
-    pod.titus.netflix.com/container-info: <base64 containerInfo>
-    v3.job.titus.netflix.com/descriptor: <base64 encoded, gzipped job descriptor>
+    pod.titus.netflix.com/container-info: "<base64 containerInfo>"
+    v3.job.titus.netflix.com/descriptor: "<base64 encoded, gzipped job descriptor>"
 
     # networking - used by the Titus CNI
 
@@ -27,9 +27,9 @@ metadata:
     kubernetes.io/egress-bandwidth: 128M
     kubernetes.io/ingress-bandwidth: 128M
     network.netflix.com/security-groups: sg-1,sg-2,sg-3
-    network.netflix.com/network-bursting-enabled: true
-    network.netflix.com/static-ip-allocation: <allocation string>
-    network.netflix.com/jumbo-frames-enabled: true
+    network.netflix.com/network-bursting-enabled: "true"
+    network.netflix.com/static-ip-allocation: allocUUID
+    network.netflix.com/jumbo-frames-enabled: "true"
 
     # security
 
@@ -50,7 +50,7 @@ metadata:
     # predicted runtime (Go’s time.Duration format)
     predictions.scheduler.titus.netflix.com/runtime: "300s"
     # confidence (percentile) of the prediction picked above
-    predictions.scheduler.titus.netflix.com/confidence: 0.95
+    predictions.scheduler.titus.netflix.com/confidence: "0.95"
     # model uuid used for the runtime prediction picked above
     predictions.scheduler.titus.netflix.com/model-id: "<uuid>"
     # version of the model used for the prediction above
@@ -75,7 +75,7 @@ metadata:
 
     # valid values: batch, idle
     pod.netflix.com/sched-policy: "batch"
-    pod.netflix.com/oom-score-adj: 1000
+    pod.netflix.com/oom-score-adj: "1000"
     pod.netflix.com/cpu-bursting-enabled: "true"
     pod.netflix.com/seccomp-agent-net-enabled: "true"
     pod.netflix.com/seccomp-agent-perf-enabled: "true"
