@@ -62,11 +62,19 @@ type Config struct {
 	SeccompAgentNetEnabled  *bool
 	SeccompAgentPerfEnabled *bool
 	SecurityGroupIDs        *[]string
-	ServiceMeshEnabled      *bool
+	Sidecars                []Sidecar
 	StaticIPAllocationUUID  *string
 	SubnetIDs               *string
 	TaskID                  *string
 	TTYEnabled              *bool
+}
+
+// Sidecar represents a sidecar that's configured to run as part of the container
+type Sidecar struct {
+	Enabled bool
+	Image   string
+	Name    string
+	Version int
 }
 
 // PodToConfig pulls out values from a pod and turns them into a Config

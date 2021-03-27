@@ -1,12 +1,14 @@
 package pod
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/docker/distribution/reference"
 	multierror "github.com/hashicorp/go-multierror"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -146,8 +148,24 @@ const (
 
 	// service configuration
 
-	AnnotationKeyServiceServiceMeshEnabled = "service.netflix.com/service-mesh.enabled"
+	AnnotationKeyServicePrefix = "service.netflix.com"
 )
+
+func validateImage(image string) error {
+	ref, err := reference.Parse(image)
+	if err != nil {
+		return err
+	}
+
+	_, digestOk := ref.(reference.Digested)
+	_, taggedOk := ref.(reference.Tagged)
+
+	if !digestOk && !taggedOk {
+		return errors.New("image does not have a digest or tag")
+	}
+
+	return nil
+}
 
 func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 	annotations := pod.GetAnnotations()
@@ -192,10 +210,6 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		{
 			key:   AnnotationKeyPodSeccompAgentPerfEnabled,
 			field: &pConf.SeccompAgentPerfEnabled,
-		},
-		{
-			key:   AnnotationKeyServiceServiceMeshEnabled,
-			field: &pConf.ServiceMeshEnabled,
 		},
 	}
 
@@ -438,7 +452,72 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		err = multierror.Append(err, fmt.Errorf("annotation is not a valid scheduler policy: %s", AnnotationKeyPodSchedPolicy))
 	}
 
+	if sErr := parseServiceAnnotations(annotations, pConf); sErr != nil {
+		err = multierror.Append(err, sErr)
+	}
+
 	return err.ErrorOrNil()
+}
+
+// Parse the "service.netflix.com/svc.v0.name" annotations
+func parseServiceAnnotations(annotations map[string]string, pConf *Config) error {
+	var err *multierror.Error
+	sidecars := map[string]Sidecar{}
+
+	for k, v := range annotations {
+		if !strings.HasPrefix(k, AnnotationKeyServicePrefix) {
+			continue
+		}
+
+		// name, version, value, eg: servicemesh.v2.image
+		splitOut := strings.Split(strings.TrimPrefix(k, AnnotationKeyServicePrefix+"/"), ".")
+		if len(splitOut) != 3 {
+			err = multierror.Append(err, fmt.Errorf("annotation has an incorrect number of service configuration parameters: %s", k))
+			continue
+		}
+		name := splitOut[0]
+		version := splitOut[1]
+		param := splitOut[2]
+
+		sc, ok := sidecars[name+"."+version]
+		if !ok {
+			vInt, vErr := strconv.Atoi(strings.TrimPrefix(version, "v"))
+			if vErr != nil {
+				err = multierror.Append(err, fmt.Errorf("annotation has an incorrect service version number: %s", k))
+				continue
+			}
+
+			sc = Sidecar{
+				Name:    name,
+				Version: vInt,
+			}
+		}
+
+		if param == "enabled" {
+			boolVal, pErr := strconv.ParseBool(v)
+			if pErr != nil {
+				err = multierror.Append(err, fmt.Errorf("annotation has an incorrect service enabled boolean value: %s", k))
+				continue
+			}
+			sc.Enabled = boolVal
+		}
+
+		if param == "image" {
+			if iErr := validateImage(v); iErr != nil {
+				err = multierror.Append(err, fmt.Errorf("error parsing service image annotation: %s: %w", k, iErr))
+				continue
+			}
+			sc.Image = v
+		}
+
+		sidecars[name+"."+version] = sc
+	}
+
+	for _, sc := range sidecars {
+		pConf.Sidecars = append(pConf.Sidecars, sc)
+	}
+
+	return err
 }
 
 // PodSchemaVersion returns the pod schema version used to create a pod.

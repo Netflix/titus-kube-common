@@ -80,7 +80,9 @@ metadata:
     pod.netflix.com/seccomp-agent-net-enabled: "true"
     pod.netflix.com/seccomp-agent-perf-enabled: "true"
 
+    # enable the service mesh sidecar
     service.netflix.com/service-mesh.v2.enabled: "true"
+    service.netflix.com/service-mesh.v2.image: "titusops/servicemesh:latest"
 
   creationTimestamp: "2020-04-14T20:24:58Z"
   labels:
