@@ -101,6 +101,8 @@ spec:
   - image: <registry URL>/titusops/nodehelloworld@sha256:<sha digest>
     imagePullPolicy: IfNotPresent
     name: "46b59bd7-3d02-42c3-951e-cdbaa60f66e2"
+    command: ["/bin/sleep"]
+    args: ["infinity"]
     resources:
       limits:
         cpu: "1"
