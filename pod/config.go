@@ -64,7 +64,7 @@ type Config struct {
 	SecurityGroupIDs        *[]string
 	Sidecars                []Sidecar
 	StaticIPAllocationUUID  *string
-	SubnetIDs               *string
+	SubnetIDs               *[]string
 	TaskID                  *string
 	TTYEnabled              *bool
 }

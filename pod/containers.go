@@ -5,6 +5,10 @@ import (
 )
 
 func GetUserContainer(pod *corev1.Pod) *corev1.Container {
+	if len(pod.Spec.Containers) == 0 {
+		return nil
+	}
+
 	firstContainer := pod.Spec.Containers[0]
 	for i := range pod.Spec.Containers {
 		c := &pod.Spec.Containers[i]

@@ -170,6 +170,9 @@ func validateImage(image string) error {
 func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 	annotations := pod.GetAnnotations()
 	userCtr := GetUserContainer(pod)
+	if userCtr == nil {
+		return errors.New("no containers found in pod")
+	}
 
 	boolAnnotations := []struct {
 		key   string
@@ -322,10 +325,6 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			field: &pConf.StaticIPAllocationUUID,
 		},
 		{
-			key:   AnnotationKeyNetworkSubnetIDs,
-			field: &pConf.SubnetIDs,
-		},
-		{
 			key:   AnnotationKeyPodTitusContainerInfo,
 			field: &pConf.ContainerInfo,
 		},
@@ -446,6 +445,15 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			sgIDs = append(sgIDs, strings.TrimSpace(sg))
 		}
 		pConf.SecurityGroupIDs = &sgIDs
+	}
+
+	if subVal, ok := annotations[AnnotationKeyNetworkSubnetIDs]; ok {
+		subsSplit := strings.Split(strings.TrimSpace(subVal), ",")
+		subIDs := []string{}
+		for _, sub := range subsSplit {
+			subIDs = append(subIDs, strings.TrimSpace(sub))
+		}
+		pConf.SubnetIDs = &subIDs
 	}
 
 	if pConf.SchedPolicy != nil && *pConf.SchedPolicy != "batch" && *pConf.SchedPolicy != "idle" {

@@ -100,7 +100,7 @@ func TestParsePod(t *testing.T) {
 		// Spaces intentionally added: we need to trim these
 		AnnotationKeyNetworkSecurityGroups:         "sg-1 , sg-2 ",
 		AnnotationKeyNetworkStaticIPAllocationUUID: "static-ip-alloc-id",
-		AnnotationKeyNetworkSubnetIDs:              "subnet-1,subnet-2",
+		AnnotationKeyNetworkSubnetIDs:              "subnet-1 , subnet-2 ",
 
 		// We don't parse these right now - including them so that
 		// tests fail if we do start parsing them or remove them
@@ -164,6 +164,7 @@ func TestParsePod(t *testing.T) {
 	conf, err := PodToConfig(pod)
 	assert.NilError(t, err)
 	sgIDs := []string{"sg-1", "sg-2"}
+	subnetIDs := []string{"subnet-1", "subnet-2"}
 	expConf := Config{
 		AppArmorProfile:         ptr.StringPtr("localhost/docker_titus"),
 		AccountID:               ptr.StringPtr("123456"),
@@ -216,7 +217,7 @@ func TestParsePod(t *testing.T) {
 			{Name: "servicemesh", Enabled: true, Image: "titusops/servicemesh:latest", Version: 2},
 		},
 		StaticIPAllocationUUID: ptr.StringPtr("static-ip-alloc-id"),
-		SubnetIDs:              ptr.StringPtr("subnet-1,subnet-2"),
+		SubnetIDs:              &subnetIDs,
 		TaskID:                 ptr.StringPtr("task-id-in-label"),
 		TTYEnabled:             ptr.BoolPtr(true),
 	}
