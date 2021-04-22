@@ -1,6 +1,7 @@
 package pod
 
 import (
+	"sort"
 	"testing"
 	"time"
 
@@ -37,7 +38,7 @@ func buildPod(annotations, labels map[string]string) *corev1.Pod {
 	gpu := resource.NewQuantity(0, resource.DecimalSI)
 	mem, _ := resource.ParseQuantity("512Mi")
 	disk, _ := resource.ParseQuantity("10Gi")
-	network, _ := resource.ParseQuantity("128Mi")
+	network, _ := resource.ParseQuantity("128M")
 
 	pod := &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -77,26 +78,29 @@ func buildPod(annotations, labels map[string]string) *corev1.Pod {
 }
 
 func TestParsePod(t *testing.T) {
+	taskId := "task-id-in-container"
 	annotations := map[string]string{
 		// strings
-		AnnotationKeyAppDetail:             "mydetail",
-		AnnotationKeyAppName:               "myapp",
-		AnnotationKeyAppOwnerEmail:         "test@example.com",
-		AnnotationKeyAppSequence:           "v000",
-		AnnotationKeyAppStack:              "mystack",
-		AnnotationKeyIAMRole:               "arn:aws:iam::0:role/DefaultContainerRole",
-		AnnotationKeyJobID:                 "myjobid",
-		AnnotationKeyJobType:               "BATCH",
-		AnnotationKeyJobDescriptor:         "myjobdesc",
-		AnnotationKeyPodTitusContainerInfo: "cinfo",
+		AnnotationKeyPrefixAppArmor + "/" + taskId: "localhost/docker_titus",
+		AnnotationKeyAppDetail:                     "mydetail",
+		AnnotationKeyAppName:                       "myapp",
+		AnnotationKeyAppOwnerEmail:                 "test@example.com",
+		AnnotationKeyAppSequence:                   "v000",
+		AnnotationKeyAppStack:                      "mystack",
+		AnnotationKeyIAMRole:                       "arn:aws:iam::0:role/DefaultContainerRole",
+		AnnotationKeyJobID:                         "myjobid",
+		AnnotationKeyJobType:                       "BATCH",
+		AnnotationKeyJobDescriptor:                 "myjobdesc",
+		AnnotationKeyPodTitusContainerInfo:         "cinfo",
 
-		AnnotationKeyNetworkAccountID:          "123456",
-		AnnotationKeyNetworkElasticIPPool:      "pool-1",
-		AnnotationKeyNetworkElasticIPs:         "eip-1,eip-2",
-		AnnotationKeyNetworkIMDSRequireToken:   "require-token",
-		AnnotationKeyNetworkSecurityGroups:     "sg-1,sg-2",
-		AnnotationKeyNetworkStaticIPAllocation: "static-ip-alloc",
-		AnnotationKeyNetworkSubnetIDs:          "subnet-1,subnet-2",
+		AnnotationKeyNetworkAccountID:        "123456",
+		AnnotationKeyNetworkElasticIPPool:    "pool-1",
+		AnnotationKeyNetworkElasticIPs:       "eip-1,eip-2",
+		AnnotationKeyNetworkIMDSRequireToken: "require-token",
+		// Spaces intentionally added: we need to trim these
+		AnnotationKeyNetworkSecurityGroups:         "sg-1 , sg-2 ",
+		AnnotationKeyNetworkStaticIPAllocationUUID: "static-ip-alloc-id",
+		AnnotationKeyNetworkSubnetIDs:              "subnet-1 , subnet-2 ",
 
 		// We don't parse these right now - including them so that
 		// tests fail if we do start parsing them or remove them
@@ -120,17 +124,16 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyLogS3PathPrefix:    "s3-prefix",
 		AnnotationKeyLogS3WriterIAMRole: "arn:aws:iam::0:role/LogWriterRole",
 
-		AnnotationKeyServiceServiceMeshImage: "titusoss/service-mesh",
-
 		// bools
-		AnnotationKeyLogKeepLocalFile:          "true",
-		AnnotationKeyNetworkAssignIPv6Address:  "true",
-		AnnotationKeyNetworkBurstingEnabled:    "true",
-		AnnotationKeyNetworkJumboFramesEnabled: "true",
-		AnnotationKeyPodCPUBurstingEnabled:     "true",
-		AnnotationKeyPodFuseEnabled:            "true",
-		AnnotationKeyPodKvmEnabled:             "true",
-		AnnotationKeyServiceServiceMeshEnabled: "true",
+		AnnotationKeyLogKeepLocalFile:           "true",
+		AnnotationKeyNetworkAssignIPv6Address:   "true",
+		AnnotationKeyNetworkBurstingEnabled:     "true",
+		AnnotationKeyNetworkJumboFramesEnabled:  "true",
+		AnnotationKeyPodCPUBurstingEnabled:      "true",
+		AnnotationKeyPodFuseEnabled:             "true",
+		AnnotationKeyPodKvmEnabled:              "true",
+		AnnotationKeyPodSeccompAgentNetEnabled:  "true",
+		AnnotationKeyPodSeccompAgentPerfEnabled: "true",
 
 		// ints
 		AnnotationKeyPodSchemaVersion:       "2",
@@ -145,6 +148,10 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyLogStdioCheckInterval:  "2m",
 		AnnotationKeyLogUploadCheckInterval: "1m",
 		AnnotationKeyLogUploadThresholdTime: "3m",
+
+		// service config
+		AnnotationKeyServicePrefix + "/servicemesh.v2.enabled": "true",
+		AnnotationKeyServicePrefix + "/servicemesh.v2.image":   "titusops/servicemesh:latest",
 	}
 
 	labels := map[string]string{
@@ -156,56 +163,61 @@ func TestParsePod(t *testing.T) {
 	pod := buildPod(annotations, labels)
 	conf, err := PodToConfig(pod)
 	assert.NilError(t, err)
-
+	sgIDs := []string{"sg-1", "sg-2"}
+	subnetIDs := []string{"subnet-1", "subnet-2"}
 	expConf := Config{
-		AccountID:              ptr.StringPtr("123456"),
-		AppDetail:              ptr.StringPtr("mydetail"),
-		AppMetadata:            ptr.StringPtr("app-metadata"),
-		AppMetadataSig:         ptr.StringPtr("app-metadata-sig"),
-		AppName:                ptr.StringPtr("myapp"),
-		AppOwnerEmail:          ptr.StringPtr("test@example.com"),
-		AppSequence:            ptr.StringPtr("v000"),
-		AppStack:               ptr.StringPtr("mystack"),
-		AssignIPv6Address:      ptr.BoolPtr(true),
-		BytesEnabled:           ptr.BoolPtr(true),
-		CapacityGroup:          ptr.StringPtr("DEFAULT"),
-		ContainerInfo:          ptr.StringPtr("cinfo"),
-		CPUBurstingEnabled:     ptr.BoolPtr(true),
-		EgressBandwidth:        stringToResourcePtr("10M"),
-		ElasticIPPool:          ptr.StringPtr("pool-1"),
-		ElasticIPs:             ptr.StringPtr("eip-1,eip-2"),
-		FuseEnabled:            ptr.BoolPtr(true),
-		HostnameStyle:          ptr.StringPtr("ec2"),
-		IAMRole:                ptr.StringPtr("arn:aws:iam::0:role/DefaultContainerRole"),
-		IMDSRequireToken:       ptr.StringPtr("require-token"),
-		IngressBandwidth:       stringToResourcePtr("20M"),
-		JobAcceptedTimestampMs: uint64Ptr(1602201163007),
-		JobDescriptor:          ptr.StringPtr("myjobdesc"),
-		JobID:                  ptr.StringPtr("myjobid"),
-		JobType:                ptr.StringPtr("BATCH"),
-		JumboFramesEnabled:     ptr.BoolPtr(true),
-		KvmEnabled:             ptr.BoolPtr(true),
-		LogKeepLocalFile:       ptr.BoolPtr(true),
-		LogStdioCheckInterval:  durationPtr("2m"),
-		LogUploadCheckInterval: durationPtr("1m"),
-		LogUploadThresholdTime: durationPtr("3m"),
-		LogS3BucketName:        ptr.StringPtr("bucket-name"),
-		LogS3PathPrefix:        ptr.StringPtr("s3-prefix"),
-		LogS3WriterIAMRole:     ptr.StringPtr("arn:aws:iam::0:role/LogWriterRole"),
-		NetworkBurstingEnabled: ptr.BoolPtr(true),
-		OomScoreAdj:            ptr.Int32Ptr(-800),
-		PodSchemaVersion:       uint32Ptr(2),
-		ResourceCPU:            stringToResourcePtr("1"),
-		ResourceDisk:           stringToResourcePtr("10737418240"),
-		ResourceMemory:         stringToResourcePtr("536870912"),
-		ResourceNetwork:        stringToResourcePtr("134217728"),
-		ResourceGPU:            stringToResourcePtr("0"),
-		SchedPolicy:            ptr.StringPtr("batch"),
-		SecurityGroups:         ptr.StringPtr("sg-1,sg-2"),
-		ServiceMeshEnabled:     ptr.BoolPtr(true),
-		ServiceMeshImage:       ptr.StringPtr("titusoss/service-mesh"),
-		StaticIPAllocation:     ptr.StringPtr("static-ip-alloc"),
-		SubnetIDs:              ptr.StringPtr("subnet-1,subnet-2"),
+		AppArmorProfile:         ptr.StringPtr("localhost/docker_titus"),
+		AccountID:               ptr.StringPtr("123456"),
+		AppDetail:               ptr.StringPtr("mydetail"),
+		AppMetadata:             ptr.StringPtr("app-metadata"),
+		AppMetadataSig:          ptr.StringPtr("app-metadata-sig"),
+		AppName:                 ptr.StringPtr("myapp"),
+		AppOwnerEmail:           ptr.StringPtr("test@example.com"),
+		AppSequence:             ptr.StringPtr("v000"),
+		AppStack:                ptr.StringPtr("mystack"),
+		AssignIPv6Address:       ptr.BoolPtr(true),
+		BytesEnabled:            ptr.BoolPtr(true),
+		CapacityGroup:           ptr.StringPtr("DEFAULT"),
+		ContainerInfo:           ptr.StringPtr("cinfo"),
+		CPUBurstingEnabled:      ptr.BoolPtr(true),
+		EgressBandwidth:         stringToResourcePtr("10M"),
+		ElasticIPPool:           ptr.StringPtr("pool-1"),
+		ElasticIPs:              ptr.StringPtr("eip-1,eip-2"),
+		FuseEnabled:             ptr.BoolPtr(true),
+		HostnameStyle:           ptr.StringPtr("ec2"),
+		IAMRole:                 ptr.StringPtr("arn:aws:iam::0:role/DefaultContainerRole"),
+		IMDSRequireToken:        ptr.StringPtr("require-token"),
+		IngressBandwidth:        stringToResourcePtr("20M"),
+		JobAcceptedTimestampMs:  uint64Ptr(1602201163007),
+		JobDescriptor:           ptr.StringPtr("myjobdesc"),
+		JobID:                   ptr.StringPtr("myjobid"),
+		JobType:                 ptr.StringPtr("BATCH"),
+		JumboFramesEnabled:      ptr.BoolPtr(true),
+		KvmEnabled:              ptr.BoolPtr(true),
+		LogKeepLocalFile:        ptr.BoolPtr(true),
+		LogStdioCheckInterval:   durationPtr("2m"),
+		LogUploadCheckInterval:  durationPtr("1m"),
+		LogUploadThresholdTime:  durationPtr("3m"),
+		LogS3BucketName:         ptr.StringPtr("bucket-name"),
+		LogS3PathPrefix:         ptr.StringPtr("s3-prefix"),
+		LogS3WriterIAMRole:      ptr.StringPtr("arn:aws:iam::0:role/LogWriterRole"),
+		NetworkBurstingEnabled:  ptr.BoolPtr(true),
+		OomScoreAdj:             ptr.Int32Ptr(-800),
+		PodSchemaVersion:        uint32Ptr(2),
+		ResourceCPU:             stringToResourcePtr("1"),
+		ResourceDisk:            stringToResourcePtr("10737418240"),
+		ResourceMemory:          stringToResourcePtr("536870912"),
+		ResourceNetwork:         stringToResourcePtr("128M"),
+		ResourceGPU:             stringToResourcePtr("0"),
+		SchedPolicy:             ptr.StringPtr("batch"),
+		SeccompAgentNetEnabled:  ptr.BoolPtr(true),
+		SeccompAgentPerfEnabled: ptr.BoolPtr(true),
+		SecurityGroupIDs:        &sgIDs,
+		Sidecars: []Sidecar{
+			{Name: "servicemesh", Enabled: true, Image: "titusops/servicemesh:latest", Version: 2},
+		},
+		StaticIPAllocationUUID: ptr.StringPtr("static-ip-alloc-id"),
+		SubnetIDs:              &subnetIDs,
 		TaskID:                 ptr.StringPtr("task-id-in-label"),
 		TTYEnabled:             ptr.BoolPtr(true),
 	}
@@ -213,7 +225,6 @@ func TestParsePod(t *testing.T) {
 }
 
 func TestParsePodInvalid(t *testing.T) {
-
 	badAnnotations := []struct {
 		annotations map[string]string
 		errMatch    string
@@ -260,6 +271,36 @@ func TestParsePodInvalid(t *testing.T) {
 			},
 			errMatch: "annotation is not a valid duration value: " + AnnotationKeyLogStdioCheckInterval,
 		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyPodSchedPolicy: "something",
+			},
+			errMatch: "annotation is not a valid scheduler policy: " + AnnotationKeyPodSchedPolicy,
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyServicePrefix + "/only-one-field": "true",
+			},
+			errMatch: "annotation has an incorrect number of service configuration parameters: service.netflix.com/only-one-field",
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyServicePrefix + "/foo.vA.enabled": "true",
+			},
+			errMatch: "annotation has an incorrect service version number: service.netflix.com/foo.vA.enabled",
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyServicePrefix + "/foo.v1.enabled": "asdf",
+			},
+			errMatch: "annotation has an incorrect service enabled boolean value: service.netflix.com/foo.v1.enabled",
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyServicePrefix + "/foo.v1.image": "asdf",
+			},
+			errMatch: "error parsing service image annotation: service.netflix.com/foo.v1.image: image does not have a digest or tag",
+		},
 	}
 
 	for _, ann := range badAnnotations {
@@ -273,6 +314,70 @@ func TestParsePodInvalid(t *testing.T) {
 	})
 	_, err := PodToConfig(pod)
 	assert.ErrorContains(t, err, "label is not a valid boolean value: "+LabelKeyByteUnitsEnabled)
+}
+
+func TestBadBoolAnnotations(t *testing.T) {
+	boolAnnotations := []string{
+		AnnotationKeyLogKeepLocalFile,
+		AnnotationKeyNetworkAssignIPv6Address,
+		AnnotationKeyNetworkBurstingEnabled,
+		AnnotationKeyNetworkJumboFramesEnabled,
+		AnnotationKeyPodCPUBurstingEnabled,
+		AnnotationKeyPodFuseEnabled,
+		AnnotationKeyPodKvmEnabled,
+		AnnotationKeyPodSeccompAgentNetEnabled,
+		AnnotationKeyPodSeccompAgentPerfEnabled,
+	}
+
+	for _, ann := range boolAnnotations {
+		pod := buildPod(map[string]string{ann: "bad"}, map[string]string{})
+		_, err := PodToConfig(pod)
+		assert.ErrorContains(t, err, "annotation is not a valid boolean value: "+ann)
+	}
+}
+
+func TestLogUploadRegExp(t *testing.T) {
+	// You can't DeepEqual regexps, so test it separately
+	annotations := map[string]string{
+		AnnotationKeyLogUploadRegexp: ".*.foo",
+	}
+	labels := map[string]string{}
+
+	pod := buildPod(annotations, labels)
+	conf, err := PodToConfig(pod)
+	assert.NilError(t, err)
+
+	assert.Assert(t, conf.LogUploadRegExp != nil)
+	assert.Equal(t, conf.LogUploadRegExp.String(), ".*.foo")
+}
+
+func TestServiceAnnotations(t *testing.T) {
+	imgWithSha := "titusops/svc@sha256:5abd793cc69018e747cb8d4bc288f1df7b20747f91ec26da88f0fa4ba2ec46a1"
+	annotations := map[string]string{
+		AnnotationKeyServicePrefix + "/svc.v2.enabled": "false",
+		AnnotationKeyServicePrefix + "/svc.v2.image":   "titusops/svc:latest",
+		AnnotationKeyServicePrefix + "/svc.v3.enabled": "true",
+		AnnotationKeyServicePrefix + "/svc.v3.image":   imgWithSha,
+	}
+	labels := map[string]string{}
+
+	pod := buildPod(annotations, labels)
+	conf, err := PodToConfig(pod)
+	assert.NilError(t, err)
+
+	assert.Assert(t, len(conf.Sidecars) == 2)
+	sidecars := conf.Sidecars
+	sort.Slice(sidecars, func(i, j int) bool {
+		if sidecars[i].Name == sidecars[j].Name {
+			return sidecars[i].Version < sidecars[j].Version
+		}
+		return sidecars[i].Name < sidecars[j].Name
+	})
+
+	assert.DeepEqual(t, []Sidecar{
+		{Name: "svc", Enabled: false, Image: "titusops/svc:latest", Version: 2},
+		{Name: "svc", Enabled: true, Image: imgWithSha, Version: 3},
+	}, sidecars)
 }
 
 // XXX: test all nil

@@ -1,10 +1,14 @@
 package pod
 
 import (
+	"errors"
 	"fmt"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/docker/distribution/reference"
 	multierror "github.com/hashicorp/go-multierror"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -19,9 +23,6 @@ const (
 	// Pod Networking
 	AnnotationKeyEgressBandwidth  = "kubernetes.io/egress-bandwidth"
 	AnnotationKeyIngressBandwidth = "kubernetes.io/ingress-bandwidth"
-	AnnotationKeySecurityGroups   = "network.titus.netflix.com/securityGroups"
-	AnnotationKeySubnets          = "network.titus.netflix.com/subnets"
-	AnnotationKeyAccountID        = "network.titus.netflix.com/accountId"
 
 	// Pod ENI
 	AnnotationKeyIPv4Address      = "network.netflix.com/address-ipv4"
@@ -46,6 +47,8 @@ const (
 	// matches kube2iam
 	AnnotationKeyIAMRole              = "iam.amazonaws.com/role"
 	AnnotationKeySecurityGroupsLegacy = "network.titus.netflix.com/securityGroups"
+	// https://kubernetes.io/docs/tutorials/clusters/apparmor/#securing-a-pod
+	AnnotationKeyPrefixAppArmor = "container.apparmor.security.beta.kubernetes.io"
 
 	//
 	// v1 pod spec annotations
@@ -73,6 +76,8 @@ const (
 
 	// networking - used by the Titus CNI
 
+	AnnotationKeySubnetsLegacy             = "network.titus.netflix.com/subnets"
+	AnnotationKeyAccountIDLegacy           = "network.titus.netflix.com/accountId"
 	AnnotationKeyNetworkAccountID          = "network.netflix.com/account-id"
 	AnnotationKeyNetworkBurstingEnabled    = "network.netflix.com/network-bursting-enabled"
 	AnnotationKeyNetworkAssignIPv6Address  = "network.netflix.com/assign-ipv6-address"
@@ -83,7 +88,6 @@ const (
 	AnnotationKeyNetworkSecurityGroups     = "network.netflix.com/security-groups"
 	AnnotationKeyNetworkSubnetIDs          = "network.netflix.com/subnet-ids"
 	// TODO: deprecate this in favor of using the UUID annotation below
-	AnnotationKeyNetworkStaticIPAllocation     = "network.netflix.com/static-ip-allocation"
 	AnnotationKeyNetworkStaticIPAllocationUUID = "network.netflix.com/static-ip-allocation-uuid"
 
 	// storage
@@ -122,12 +126,14 @@ const (
 
 	// pod features
 
-	AnnotationKeyPodCPUBurstingEnabled = "pod.netflix.com/cpu-bursting-enabled"
-	AnnotationKeyPodKvmEnabled         = "pod.netflix.com/kvm-enabled"
-	AnnotationKeyPodFuseEnabled        = "pod.netflix.com/fuse-enabled"
-	AnnotationKeyPodHostnameStyle      = "pod.netflix.com/hostname-style"
-	AnnotationKeyPodOomScoreAdj        = "pod.netflix.com/oom-score-adj"
-	AnnotationKeyPodSchedPolicy        = "pod.netflix.com/sched-policy"
+	AnnotationKeyPodCPUBurstingEnabled      = "pod.netflix.com/cpu-bursting-enabled"
+	AnnotationKeyPodKvmEnabled              = "pod.netflix.com/kvm-enabled"
+	AnnotationKeyPodFuseEnabled             = "pod.netflix.com/fuse-enabled"
+	AnnotationKeyPodHostnameStyle           = "pod.netflix.com/hostname-style"
+	AnnotationKeyPodOomScoreAdj             = "pod.netflix.com/oom-score-adj"
+	AnnotationKeyPodSchedPolicy             = "pod.netflix.com/sched-policy"
+	AnnotationKeyPodSeccompAgentNetEnabled  = "pod.netflix.com/seccomp-agent-net-enabled"
+	AnnotationKeyPodSeccompAgentPerfEnabled = "pod.netflix.com/seccomp-agent-perf-enabled"
 
 	// logging config
 
@@ -138,15 +144,36 @@ const (
 	AnnotationKeyLogStdioCheckInterval  = "log.netflix.com/stdio-check-interval"
 	AnnotationKeyLogUploadThresholdTime = "log.netflix.com/upload-threshold-time"
 	AnnotationKeyLogUploadCheckInterval = "log.netflix.com/upload-check-interval"
+	AnnotationKeyLogUploadRegexp        = "log.netflix.com/upload-regexp"
 
 	// service configuration
 
-	AnnotationKeyServiceServiceMeshEnabled = "service.netflix.com/service-mesh/enabled"
-	AnnotationKeyServiceServiceMeshImage   = "service.netflix.com/service-mesh/image"
+	AnnotationKeyServicePrefix = "service.netflix.com"
 )
+
+func validateImage(image string) error {
+	ref, err := reference.Parse(image)
+	if err != nil {
+		return err
+	}
+
+	_, digestOk := ref.(reference.Digested)
+	_, taggedOk := ref.(reference.Tagged)
+
+	if !digestOk && !taggedOk {
+		return errors.New("image does not have a digest or tag")
+	}
+
+	return nil
+}
 
 func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 	annotations := pod.GetAnnotations()
+	userCtr := GetUserContainer(pod)
+	if userCtr == nil {
+		return errors.New("no containers found in pod")
+	}
+
 	boolAnnotations := []struct {
 		key   string
 		field **bool
@@ -180,8 +207,12 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			field: &pConf.KvmEnabled,
 		},
 		{
-			key:   AnnotationKeyServiceServiceMeshEnabled,
-			field: &pConf.ServiceMeshEnabled,
+			key:   AnnotationKeyPodSeccompAgentNetEnabled,
+			field: &pConf.SeccompAgentNetEnabled,
+		},
+		{
+			key:   AnnotationKeyPodSeccompAgentPerfEnabled,
+			field: &pConf.SeccompAgentPerfEnabled,
 		},
 	}
 
@@ -221,6 +252,10 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		key   string
 		field **string
 	}{
+		{
+			key:   AnnotationKeyPrefixAppArmor + "/" + userCtr.Name,
+			field: &pConf.AppArmorProfile,
+		},
 		{
 			key:   AnnotationKeyAppDetail,
 			field: &pConf.AppDetail,
@@ -286,16 +321,8 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			field: &pConf.IMDSRequireToken,
 		},
 		{
-			key:   AnnotationKeyNetworkSecurityGroups,
-			field: &pConf.SecurityGroups,
-		},
-		{
-			key:   AnnotationKeyNetworkStaticIPAllocation,
-			field: &pConf.StaticIPAllocation,
-		},
-		{
-			key:   AnnotationKeyNetworkSubnetIDs,
-			field: &pConf.SubnetIDs,
+			key:   AnnotationKeyNetworkStaticIPAllocationUUID,
+			field: &pConf.StaticIPAllocationUUID,
 		},
 		{
 			key:   AnnotationKeyPodTitusContainerInfo,
@@ -316,10 +343,6 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		{
 			key:   AnnotationKeySecurityAppMetadataSig,
 			field: &pConf.AppMetadataSig,
-		},
-		{
-			key:   AnnotationKeyServiceServiceMeshImage,
-			field: &pConf.ServiceMeshImage,
 		},
 	}
 	var err *multierror.Error
@@ -406,7 +429,103 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		}
 	}
 
+	if uploadRegexpVal, ok := annotations[AnnotationKeyLogUploadRegexp]; ok {
+		uploadRegexp, pErr := regexp.Compile(uploadRegexpVal)
+		if pErr == nil {
+			pConf.LogUploadRegExp = uploadRegexp
+		} else {
+			err = multierror.Append(err, fmt.Errorf("annotation is not a valid regexp value: %s: %w", AnnotationKeyLogUploadRegexp, pErr))
+		}
+	}
+
+	if sgVal, ok := annotations[AnnotationKeyNetworkSecurityGroups]; ok {
+		sgsSplit := strings.Split(strings.TrimSpace(sgVal), ",")
+		sgIDs := []string{}
+		for _, sg := range sgsSplit {
+			sgIDs = append(sgIDs, strings.TrimSpace(sg))
+		}
+		pConf.SecurityGroupIDs = &sgIDs
+	}
+
+	if subVal, ok := annotations[AnnotationKeyNetworkSubnetIDs]; ok {
+		subsSplit := strings.Split(strings.TrimSpace(subVal), ",")
+		subIDs := []string{}
+		for _, sub := range subsSplit {
+			subIDs = append(subIDs, strings.TrimSpace(sub))
+		}
+		pConf.SubnetIDs = &subIDs
+	}
+
+	if pConf.SchedPolicy != nil && *pConf.SchedPolicy != "batch" && *pConf.SchedPolicy != "idle" {
+		err = multierror.Append(err, fmt.Errorf("annotation is not a valid scheduler policy: %s", AnnotationKeyPodSchedPolicy))
+	}
+
+	if sErr := parseServiceAnnotations(annotations, pConf); sErr != nil {
+		err = multierror.Append(err, sErr)
+	}
+
 	return err.ErrorOrNil()
+}
+
+// Parse the "service.netflix.com/svc.v0.name" annotations
+func parseServiceAnnotations(annotations map[string]string, pConf *Config) error {
+	var err *multierror.Error
+	sidecars := map[string]Sidecar{}
+
+	for k, v := range annotations {
+		if !strings.HasPrefix(k, AnnotationKeyServicePrefix) {
+			continue
+		}
+
+		// name, version, value, eg: servicemesh.v2.image
+		splitOut := strings.Split(strings.TrimPrefix(k, AnnotationKeyServicePrefix+"/"), ".")
+		if len(splitOut) != 3 {
+			err = multierror.Append(err, fmt.Errorf("annotation has an incorrect number of service configuration parameters: %s", k))
+			continue
+		}
+		name := splitOut[0]
+		version := splitOut[1]
+		param := splitOut[2]
+
+		sc, ok := sidecars[name+"."+version]
+		if !ok {
+			vInt, vErr := strconv.Atoi(strings.TrimPrefix(version, "v"))
+			if vErr != nil {
+				err = multierror.Append(err, fmt.Errorf("annotation has an incorrect service version number: %s", k))
+				continue
+			}
+
+			sc = Sidecar{
+				Name:    name,
+				Version: vInt,
+			}
+		}
+
+		if param == "enabled" {
+			boolVal, pErr := strconv.ParseBool(v)
+			if pErr != nil {
+				err = multierror.Append(err, fmt.Errorf("annotation has an incorrect service enabled boolean value: %s", k))
+				continue
+			}
+			sc.Enabled = boolVal
+		}
+
+		if param == "image" {
+			if iErr := validateImage(v); iErr != nil {
+				err = multierror.Append(err, fmt.Errorf("error parsing service image annotation: %s: %w", k, iErr))
+				continue
+			}
+			sc.Image = v
+		}
+
+		sidecars[name+"."+version] = sc
+	}
+
+	for _, sc := range sidecars {
+		pConf.Sidecars = append(pConf.Sidecars, sc)
+	}
+
+	return err
 }
 
 // PodSchemaVersion returns the pod schema version used to create a pod.

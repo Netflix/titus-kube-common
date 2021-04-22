@@ -2,6 +2,7 @@ package pod
 
 import (
 	"errors"
+	"regexp"
 	"time"
 
 	resourceCommon "github.com/Netflix/titus-kube-common/resource"
@@ -13,56 +14,67 @@ import (
 // (such as annotations). All fields are pointers, to differentiate between a field being
 // unset and the empty value.
 type Config struct {
-	AssignIPv6Address      *bool
-	AccountID              *string
-	AppDetail              *string
-	AppName                *string
-	AppMetadata            *string
-	AppMetadataSig         *string
-	AppOwnerEmail          *string
-	AppSequence            *string
-	AppStack               *string
-	BytesEnabled           *bool
-	CapacityGroup          *string
-	CPUBurstingEnabled     *bool
-	ContainerInfo          *string
-	EgressBandwidth        *resource.Quantity
-	ElasticIPPool          *string
-	ElasticIPs             *string
-	FuseEnabled            *bool
-	HostnameStyle          *string
-	IAMRole                *string
-	IngressBandwidth       *resource.Quantity
-	IMDSRequireToken       *string
-	JobAcceptedTimestampMs *uint64
-	JobDescriptor          *string
-	JobID                  *string
-	JobType                *string
-	JumboFramesEnabled     *bool
-	KvmEnabled             *bool
-	LogKeepLocalFile       *bool
-	LogUploadCheckInterval *time.Duration
-	LogUploadThresholdTime *time.Duration
-	LogStdioCheckInterval  *time.Duration
-	LogS3WriterIAMRole     *string
-	LogS3BucketName        *string
-	LogS3PathPrefix        *string
-	NetworkBurstingEnabled *bool
-	OomScoreAdj            *int32
-	PodSchemaVersion       *uint32
-	ResourceCPU            *resource.Quantity
-	ResourceDisk           *resource.Quantity
-	ResourceGPU            *resource.Quantity
-	ResourceMemory         *resource.Quantity
-	ResourceNetwork        *resource.Quantity
-	SchedPolicy            *string
-	SecurityGroups         *string
-	ServiceMeshEnabled     *bool
-	ServiceMeshImage       *string
-	StaticIPAllocation     *string
-	SubnetIDs              *string
-	TaskID                 *string
-	TTYEnabled             *bool
+	AssignIPv6Address       *bool
+	AccountID               *string
+	AppArmorProfile         *string
+	AppDetail               *string
+	AppName                 *string
+	AppMetadata             *string
+	AppMetadataSig          *string
+	AppOwnerEmail           *string
+	AppSequence             *string
+	AppStack                *string
+	BytesEnabled            *bool
+	CapacityGroup           *string
+	CPUBurstingEnabled      *bool
+	ContainerInfo           *string
+	EgressBandwidth         *resource.Quantity
+	ElasticIPPool           *string
+	ElasticIPs              *string
+	FuseEnabled             *bool
+	HostnameStyle           *string
+	IAMRole                 *string
+	IngressBandwidth        *resource.Quantity
+	IMDSRequireToken        *string
+	JobAcceptedTimestampMs  *uint64
+	JobDescriptor           *string
+	JobID                   *string
+	JobType                 *string
+	JumboFramesEnabled      *bool
+	KvmEnabled              *bool
+	LogKeepLocalFile        *bool
+	LogUploadCheckInterval  *time.Duration
+	LogUploadThresholdTime  *time.Duration
+	LogUploadRegExp         *regexp.Regexp
+	LogStdioCheckInterval   *time.Duration
+	LogS3WriterIAMRole      *string
+	LogS3BucketName         *string
+	LogS3PathPrefix         *string
+	NetworkBurstingEnabled  *bool
+	OomScoreAdj             *int32
+	PodSchemaVersion        *uint32
+	ResourceCPU             *resource.Quantity
+	ResourceDisk            *resource.Quantity
+	ResourceGPU             *resource.Quantity
+	ResourceMemory          *resource.Quantity
+	ResourceNetwork         *resource.Quantity
+	SchedPolicy             *string
+	SeccompAgentNetEnabled  *bool
+	SeccompAgentPerfEnabled *bool
+	SecurityGroupIDs        *[]string
+	Sidecars                []Sidecar
+	StaticIPAllocationUUID  *string
+	SubnetIDs               *[]string
+	TaskID                  *string
+	TTYEnabled              *bool
+}
+
+// Sidecar represents a sidecar that's configured to run as part of the container
+type Sidecar struct {
+	Enabled bool
+	Image   string
+	Name    string
+	Version int
 }
 
 // PodToConfig pulls out values from a pod and turns them into a Config
