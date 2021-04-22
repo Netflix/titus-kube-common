@@ -81,8 +81,8 @@ metadata:
     pod.netflix.com/seccomp-agent-perf-enabled: "true"
 
     # enable the service mesh sidecar
-    service.netflix.com/service-mesh.v2.enabled: "true"
-    service.netflix.com/service-mesh.v2.image: "titusops/servicemesh:latest"
+    service.netflix.com/servicemesh.v2.enabled: "true"
+    service.netflix.com/servicemesh.v2.image: "titusops/servicemesh:latest"
 
   creationTimestamp: "2020-04-14T20:24:58Z"
   labels:
@@ -127,15 +127,19 @@ spec:
     stdin: true
     tty: true
 
+    # names must match the volume names in `volumes` below
     volumeMounts:
       # EFS
-        # name must match the volume name below
       - name: efs-fs-abcdef-rwm.subdir1
         mountPath: "/efs"
 
       # SHM
       - name: dev-shm
         mountPath: "/dev/shm"
+
+      # EBS
+      - name: ebs-vol-abcdef
+        mountPath: "/ebs"
 
     securityContext:
       capabilities:
@@ -159,8 +163,7 @@ spec:
 
 
   volumes:
-  # EFS (docs, example 1, example 2)
-  # Is this still valid for more recent k8s versions?
+  # EFS
   - name: efs-fs-abcdef-rwm.subdir1
     nfs:
       # URL for the NFS server
@@ -173,3 +176,10 @@ spec:
     emptyDir:
       medium: Memory
       sizeLimit: "256Mi"
+
+  # EBS
+  - name: ebs-vol-abcdef
+    awsElasticBlockStore::
+      volumeID: "vol-abcdef"
+      fsType: ext4
+      readOnly: true
