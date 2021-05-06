@@ -72,7 +72,8 @@ const (
 	AnnotationKeyJobType                = "v3.job.titus.netflix.com/type"
 	AnnotationKeyJobDescriptor          = "v3.job.titus.netflix.com/descriptor"
 	// AnnotationKeyPodTitusContainerInfo - to be removed once VK supports the full pod spec
-	AnnotationKeyPodTitusContainerInfo = "pod.titus.netflix.com/container-info"
+	AnnotationKeyPodTitusContainerInfo            = "pod.titus.netflix.com/container-info"
+	AnnotationKeyPodTitusEntrypointShellSplitting = "pod.titus.netflix.com/entrypoint-shell-splitting-enabled"
 
 	// networking - used by the Titus CNI
 
@@ -213,6 +214,10 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		{
 			key:   AnnotationKeyPodSeccompAgentPerfEnabled,
 			field: &pConf.SeccompAgentPerfEnabled,
+		},
+		{
+			key:   AnnotationKeyPodTitusEntrypointShellSplitting,
+			field: &pConf.EntrypointShellSplitting,
 		},
 	}
 
