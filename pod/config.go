@@ -68,6 +68,7 @@ type Config struct {
 	SubnetIDs                *[]string
 	TaskID                   *string
 	TTYEnabled               *bool
+	UserEnvVarsStartIndex    *uint32
 }
 
 // Sidecar represents a sidecar that's configured to run as part of the container

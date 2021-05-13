@@ -72,8 +72,11 @@ const (
 	AnnotationKeyJobType                = "v3.job.titus.netflix.com/type"
 	AnnotationKeyJobDescriptor          = "v3.job.titus.netflix.com/descriptor"
 	// AnnotationKeyPodTitusContainerInfo - to be removed once VK supports the full pod spec
-	AnnotationKeyPodTitusContainerInfo            = "pod.titus.netflix.com/container-info"
+	AnnotationKeyPodTitusContainerInfo = "pod.titus.netflix.com/container-info"
+	// AnnotationKeyPodTitusEntrypointShellSplitting tells the executor to preserve the legacy shell splitting behaviour
 	AnnotationKeyPodTitusEntrypointShellSplitting = "pod.titus.netflix.com/entrypoint-shell-splitting-enabled"
+	// AnnotationKeyPodTitusUserEnvVarsStartIndex tells the executor what index the user-specified environment variables start at
+	AnnotationKeyPodTitusUserEnvVarsStartIndex = "pod.titus.netflix.com/user-env-vars-start-index"
 
 	// networking - used by the Titus CNI
 
@@ -350,6 +353,21 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			field: &pConf.AppMetadataSig,
 		},
 	}
+
+	uint32Annotations := []struct {
+		key   string
+		field **uint32
+	}{
+		{
+			key:   AnnotationKeyPodSchemaVersion,
+			field: &pConf.PodSchemaVersion,
+		},
+		{
+			key:   AnnotationKeyPodTitusUserEnvVarsStartIndex,
+			field: &pConf.UserEnvVarsStartIndex,
+		},
+	}
+
 	var err *multierror.Error
 
 	for _, an := range stringAnnotations {
@@ -377,18 +395,20 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		}
 	}
 
-	val, ok := annotations[AnnotationKeyPodSchemaVersion]
-	if ok {
-		parsedVal, pErr := strconv.ParseUint(val, 10, 32)
-		if pErr == nil {
-			parsedUint32 := uint32(parsedVal)
-			pConf.PodSchemaVersion = &parsedUint32
-		} else {
-			err = multierror.Append(err, fmt.Errorf("annotation is not a valid uint32 value: %s", AnnotationKeyPodSchemaVersion))
+	for _, an := range uint32Annotations {
+		val, ok := annotations[an.key]
+		if ok {
+			parsedVal, pErr := strconv.ParseUint(val, 10, 32)
+			if pErr == nil {
+				parsedUint32 := uint32(parsedVal)
+				*an.field = &parsedUint32
+			} else {
+				err = multierror.Append(err, fmt.Errorf("annotation is not a valid uint32 value: %s", an.key))
+			}
 		}
 	}
 
-	val, ok = annotations[AnnotationKeyJobAcceptedTimestampMs]
+	val, ok := annotations[AnnotationKeyJobAcceptedTimestampMs]
 	if ok {
 		parsedVal, pErr := strconv.ParseUint(val, 10, 64)
 		if pErr == nil {
