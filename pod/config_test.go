@@ -137,9 +137,10 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyPodTitusEntrypointShellSplitting: "true",
 
 		// ints
-		AnnotationKeyPodSchemaVersion:       "2",
-		AnnotationKeyJobAcceptedTimestampMs: "1602201163007",
-		AnnotationKeyPodOomScoreAdj:         "-800",
+		AnnotationKeyPodSchemaVersion:              "2",
+		AnnotationKeyJobAcceptedTimestampMs:        "1602201163007",
+		AnnotationKeyPodOomScoreAdj:                "-800",
+		AnnotationKeyPodTitusUserEnvVarsStartIndex: "4",
 
 		// resource values
 		AnnotationKeyEgressBandwidth:  "10M",
@@ -222,6 +223,7 @@ func TestParsePod(t *testing.T) {
 		SubnetIDs:              &subnetIDs,
 		TaskID:                 ptr.StringPtr("task-id-in-label"),
 		TTYEnabled:             ptr.BoolPtr(true),
+		UserEnvVarsStartIndex:  uint32Ptr(4),
 	}
 	assert.DeepEqual(t, expConf, *conf)
 }
@@ -248,6 +250,12 @@ func TestParsePodInvalid(t *testing.T) {
 				AnnotationKeyPodSchemaVersion: "-2",
 			},
 			errMatch: "annotation is not a valid uint32 value: " + AnnotationKeyPodSchemaVersion,
+		},
+		{
+			annotations: map[string]string{
+				AnnotationKeyPodTitusUserEnvVarsStartIndex: "-2",
+			},
+			errMatch: "annotation is not a valid uint32 value: " + AnnotationKeyPodTitusUserEnvVarsStartIndex,
 		},
 		{
 			annotations: map[string]string{

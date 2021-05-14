@@ -13,13 +13,17 @@ metadata:
     workload.netflix.com/detail: testdetail
     workload.netflix.com/sequence: v001
     workload.netflix.com/owner-email: myuser@netflix.com
+
     # Titus-specific fields
+
     v3.job.titus.netflix.com/accepted-timestamp-ms: "1615574101371"
     v3.job.titus.netflix.com/id: "a318b9eb-50bf-4927-a9eb-b3d5a757f364"
     v3.job.titus.netflix.com/type: SERVICE
     # to be removed once VK supports the full pod spec
     pod.titus.netflix.com/container-info: "<base64 containerInfo>"
     v3.job.titus.netflix.com/descriptor: "<base64 encoded, gzipped job descriptor>"
+    pod.titus.netflix.com/entrypoint-shell-splitting-enabled: "true"
+    pod.titus.netflix.com/user-env-vars-start-index: "12"
 
     # networking - used by the Titus CNI
 
