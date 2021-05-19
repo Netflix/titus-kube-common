@@ -23,13 +23,13 @@ const (
 	LabelKeyCapacityGroupLegacy = "titus.netflix.com/capacityGroup"
 
 	// v1 pod labels
-	LabelKeyJobId         = "v3.job.titus.netflix.com/job-id"
-	LabelKeyTaskId        = "v3.job.titus.netflix.com/task-id"
-	LabelKeyAppName       = "app.netflix.com/name"
-	LabelKeyAppStack      = "app.netflix.com/stack"
-	LabelKeyAppDetail     = "app.netflix.com/detail"
-	LabelKeyAppSequence   = "app.netflix.com/sequence"
-	LabelKeyCapacityGroup = "titus.netflix.com/capacity-group"
+	LabelKeyJobId            = "v3.job.titus.netflix.com/job-id"
+	LabelKeyTaskId           = "v3.job.titus.netflix.com/task-id"
+	LabelKeyCapacityGroup    = "titus.netflix.com/capacity-group"
+	LabelKeyWorkloadName     = "workload.netflix.com/name"
+	LabelKeyWorkloadStack    = "workload.netflix.com/stack"
+	LabelKeyWorkloadDetail   = "workload.netflix.com/detail"
+	LabelKeyWorkloadSequence = "workload.netflix.com/sequence"
 )
 
 // Is the control plane indicating that it's sending the resources in bytes?

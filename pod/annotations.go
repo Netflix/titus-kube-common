@@ -57,13 +57,13 @@ const (
 	// AnnotationKeyPodSchemaVersion is an integer specifying what schema version a pod was created with
 	AnnotationKeyPodSchemaVersion = "pod.netflix.com/pod-schema-version"
 
-	// App-specific fields
+	// Workload-specific fields
 
-	AnnotationKeyAppDetail     = "app.netflix.com/detail"
-	AnnotationKeyAppName       = "app.netflix.com/name"
-	AnnotationKeyAppOwnerEmail = "app.netflix.com/owner-email"
-	AnnotationKeyAppSequence   = "app.netflix.com/sequence"
-	AnnotationKeyAppStack      = "app.netflix.com/stack"
+	AnnotationKeyWorkloadDetail     = "workload.netflix.com/detail"
+	AnnotationKeyWorkloadName       = "workload.netflix.com/name"
+	AnnotationKeyWorkloadOwnerEmail = "workload.netflix.com/owner-email"
+	AnnotationKeyWorkloadSequence   = "workload.netflix.com/sequence"
+	AnnotationKeyWorkloadStack      = "workload.netflix.com/stack"
 
 	// Titus-specific fields
 
@@ -102,8 +102,8 @@ const (
 
 	// security
 
-	AnnotationKeySecurityAppMetadata    = "security.netflix.com/app-metadata"
-	AnnotationKeySecurityAppMetadataSig = "security.netflix.com/app-metadata-sig"
+	AnnotationKeySecurityWorkloadMetadata    = "security.netflix.com/workload-metadata"
+	AnnotationKeySecurityWorkloadMetadataSig = "security.netflix.com/workload-metadata-sig"
 
 	// opportunistic resources (see control-plane and scheduler code)
 
@@ -265,24 +265,24 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			field: &pConf.AppArmorProfile,
 		},
 		{
-			key:   AnnotationKeyAppDetail,
-			field: &pConf.AppDetail,
+			key:   AnnotationKeyWorkloadDetail,
+			field: &pConf.WorkloadDetail,
 		},
 		{
-			key:   AnnotationKeyAppName,
-			field: &pConf.AppName,
+			key:   AnnotationKeyWorkloadName,
+			field: &pConf.WorkloadName,
 		},
 		{
-			key:   AnnotationKeyAppOwnerEmail,
-			field: &pConf.AppOwnerEmail,
+			key:   AnnotationKeyWorkloadOwnerEmail,
+			field: &pConf.WorkloadOwnerEmail,
 		},
 		{
-			key:   AnnotationKeyAppSequence,
-			field: &pConf.AppSequence,
+			key:   AnnotationKeyWorkloadSequence,
+			field: &pConf.WorkloadSequence,
 		},
 		{
-			key:   AnnotationKeyAppStack,
-			field: &pConf.AppStack,
+			key:   AnnotationKeyWorkloadStack,
+			field: &pConf.WorkloadStack,
 		},
 		{
 			key:   AnnotationKeyIAMRole,
@@ -345,12 +345,12 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			field: &pConf.SchedPolicy,
 		},
 		{
-			key:   AnnotationKeySecurityAppMetadata,
-			field: &pConf.AppMetadata,
+			key:   AnnotationKeySecurityWorkloadMetadata,
+			field: &pConf.WorkloadMetadata,
 		},
 		{
-			key:   AnnotationKeySecurityAppMetadataSig,
-			field: &pConf.AppMetadataSig,
+			key:   AnnotationKeySecurityWorkloadMetadataSig,
+			field: &pConf.WorkloadMetadataSig,
 		},
 	}
 
