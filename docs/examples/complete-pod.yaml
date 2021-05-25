@@ -37,8 +37,8 @@ metadata:
 
     # security
 
-    security.netflix.com/app-metadata: <Metatron app metadata>
-    security.netflix.com/app-metadata-sig: <Metatron app signature>
+    security.netflix.com/workload-metadata: <Metatron app metadata>
+    security.netflix.com/workload-metadata-sig: <Metatron app signature>
     # matches kube2iam:
     iam.amazonaws.com/role: "arn:aws:iam::0:role/MyContainerRole"
     # AppArmor: https://kubernetes.io/docs/tutorials/clusters/apparmor/#securing-a-pod

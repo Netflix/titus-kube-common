@@ -17,13 +17,6 @@ type Config struct {
 	AssignIPv6Address        *bool
 	AccountID                *string
 	AppArmorProfile          *string
-	AppDetail                *string
-	AppName                  *string
-	AppMetadata              *string
-	AppMetadataSig           *string
-	AppOwnerEmail            *string
-	AppSequence              *string
-	AppStack                 *string
 	BytesEnabled             *bool
 	CapacityGroup            *string
 	CPUBurstingEnabled       *bool
@@ -69,6 +62,13 @@ type Config struct {
 	TaskID                   *string
 	TTYEnabled               *bool
 	UserEnvVarsStartIndex    *uint32
+	WorkloadDetail           *string
+	WorkloadName             *string
+	WorkloadMetadata         *string
+	WorkloadMetadataSig      *string
+	WorkloadOwnerEmail       *string
+	WorkloadSequence         *string
+	WorkloadStack            *string
 }
 
 // Sidecar represents a sidecar that's configured to run as part of the container
