@@ -139,6 +139,11 @@ const (
 	AnnotationKeyPodSeccompAgentNetEnabled  = "pod.netflix.com/seccomp-agent-net-enabled"
 	AnnotationKeyPodSeccompAgentPerfEnabled = "pod.netflix.com/seccomp-agent-perf-enabled"
 
+	// container annotations (specified on a pod about a container)
+	// Specific containers indicate they want to set something by appending
+	// a prefix key with their container name.
+	AnnotationKeyPrefixContainerTypePlatformSidecar = "type.container.netflix.com/"
+
 	// logging config
 
 	AnnotationKeyLogKeepLocalFile       = "log.netflix.com/keep-local-file-after-upload"
