@@ -143,6 +143,7 @@ const (
 	// Specific containers indicate they want to set something by appending
 	// a prefix key with their container name.
 	AnnotationKeyPrefixContainerTypePlatformSidecar = "type.container.netflix.com/"
+	AnnotationValueContainerTypePlatformSidecar     = "PlatformSidecar"
 
 	// logging config
 
@@ -573,4 +574,12 @@ func PodSchemaVersion(pod *corev1.Pod) (uint32, error) {
 	}
 
 	return uint32(parsedVal), nil
+}
+
+// IsPlatformSidecarContainer takes a container name and pod object,
+// and can tell you if a particular container is a Platform Sidecar
+func IsPlatformSidecarContainer(name string, pod *corev1.Pod) bool {
+	containerTypeAnnotation := AnnotationKeyPrefixContainerTypePlatformSidecar + name
+	value := pod.Annotations[containerTypeAnnotation]
+	return value == AnnotationValueContainerTypePlatformSidecar
 }
