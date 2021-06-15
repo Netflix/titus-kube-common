@@ -137,10 +137,10 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyPodTitusEntrypointShellSplitting: "true",
 
 		// ints
-		AnnotationKeyPodSchemaVersion:              "2",
-		AnnotationKeyJobAcceptedTimestampMs:        "1602201163007",
-		AnnotationKeyPodOomScoreAdj:                "-800",
-		AnnotationKeyPodTitusUserEnvVarsStartIndex: "4",
+		AnnotationKeyPodSchemaVersion:                "2",
+		AnnotationKeyJobAcceptedTimestampMs:          "1602201163007",
+		AnnotationKeyPodOomScoreAdj:                  "-800",
+		AnnotationKeyPodTitusSystemEnvVarsStartIndex: "4",
 
 		// resource values
 		AnnotationKeyEgressBandwidth:  "10M",
@@ -219,11 +219,11 @@ func TestParsePod(t *testing.T) {
 		Sidecars: []Sidecar{
 			{Name: "servicemesh", Enabled: true, Image: "titusops/servicemesh:latest", Version: 2},
 		},
-		StaticIPAllocationUUID: ptr.StringPtr("static-ip-alloc-id"),
-		SubnetIDs:              &subnetIDs,
-		TaskID:                 ptr.StringPtr("task-id-in-label"),
-		TTYEnabled:             ptr.BoolPtr(true),
-		UserEnvVarsStartIndex:  uint32Ptr(4),
+		StaticIPAllocationUUID:  ptr.StringPtr("static-ip-alloc-id"),
+		SubnetIDs:               &subnetIDs,
+		SystemEnvVarsStartIndex: uint32Ptr(4),
+		TaskID:                  ptr.StringPtr("task-id-in-label"),
+		TTYEnabled:              ptr.BoolPtr(true),
 	}
 	assert.DeepEqual(t, expConf, *conf)
 }
@@ -253,9 +253,9 @@ func TestParsePodInvalid(t *testing.T) {
 		},
 		{
 			annotations: map[string]string{
-				AnnotationKeyPodTitusUserEnvVarsStartIndex: "-2",
+				AnnotationKeyPodTitusSystemEnvVarsStartIndex: "-2",
 			},
-			errMatch: "annotation is not a valid uint32 value: " + AnnotationKeyPodTitusUserEnvVarsStartIndex,
+			errMatch: "annotation is not a valid uint32 value: " + AnnotationKeyPodTitusSystemEnvVarsStartIndex,
 		},
 		{
 			annotations: map[string]string{

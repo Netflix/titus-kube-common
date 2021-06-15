@@ -75,8 +75,8 @@ const (
 	AnnotationKeyPodTitusContainerInfo = "pod.titus.netflix.com/container-info"
 	// AnnotationKeyPodTitusEntrypointShellSplitting tells the executor to preserve the legacy shell splitting behaviour
 	AnnotationKeyPodTitusEntrypointShellSplitting = "pod.titus.netflix.com/entrypoint-shell-splitting-enabled"
-	// AnnotationKeyPodTitusUserEnvVarsStartIndex tells the executor what index the user-specified environment variables start at
-	AnnotationKeyPodTitusUserEnvVarsStartIndex = "pod.titus.netflix.com/user-env-vars-start-index"
+	// AnnotationKeyPodTitusUserEnvVarsStartIndex tells the executor what index the system-specified environment variables start at
+	AnnotationKeyPodTitusSystemEnvVarsStartIndex = "pod.titus.netflix.com/system-env-vars-start-index"
 
 	// networking - used by the Titus CNI
 
@@ -369,8 +369,8 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			field: &pConf.PodSchemaVersion,
 		},
 		{
-			key:   AnnotationKeyPodTitusUserEnvVarsStartIndex,
-			field: &pConf.UserEnvVarsStartIndex,
+			key:   AnnotationKeyPodTitusSystemEnvVarsStartIndex,
+			field: &pConf.SystemEnvVarsStartIndex,
 		},
 	}
 

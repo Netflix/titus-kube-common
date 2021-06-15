@@ -58,10 +58,10 @@ type Config struct {
 	SecurityGroupIDs         *[]string
 	Sidecars                 []Sidecar
 	StaticIPAllocationUUID   *string
+	SystemEnvVarsStartIndex  *uint32
 	SubnetIDs                *[]string
 	TaskID                   *string
 	TTYEnabled               *bool
-	UserEnvVarsStartIndex    *uint32
 	WorkloadDetail           *string
 	WorkloadName             *string
 	WorkloadMetadata         *string
