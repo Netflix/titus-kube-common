@@ -61,7 +61,7 @@ func TestPodPlatformSidecars(t *testing.T) {
 			Name:      "foo",
 			Namespace: "default",
 			Annotations: map[string]string{
-				AnnotationKeyPrefixContainerTypePlatformSidecar + "im-a-platform-sidecar": AnnotationValueContainerTypePlatformSidecar,
+				AnnotationKeyPrefixContainerType + "im-a-platform-sidecar": AnnotationValueContainerTypePlatformSidecar,
 			},
 		},
 		Spec: corev1.PodSpec{
