@@ -75,8 +75,8 @@ const (
 	AnnotationKeyPodTitusContainerInfo = "pod.titus.netflix.com/container-info"
 	// AnnotationKeyPodTitusEntrypointShellSplitting tells the executor to preserve the legacy shell splitting behaviour
 	AnnotationKeyPodTitusEntrypointShellSplitting = "pod.titus.netflix.com/entrypoint-shell-splitting-enabled"
-	// AnnotationKeyPodTitusUserEnvVarsStartIndex tells the executor what index the user-specified environment variables start at
-	AnnotationKeyPodTitusUserEnvVarsStartIndex = "pod.titus.netflix.com/user-env-vars-start-index"
+	// AnnotationKeyPodTitusSystemEnvVarNames tells the executor the names of the system-specified environment variables
+	AnnotationKeyPodTitusSystemEnvVarNames = "pod.titus.netflix.com/system-env-var-names"
 
 	// networking - used by the Titus CNI
 
@@ -368,10 +368,6 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			key:   AnnotationKeyPodSchemaVersion,
 			field: &pConf.PodSchemaVersion,
 		},
-		{
-			key:   AnnotationKeyPodTitusUserEnvVarsStartIndex,
-			field: &pConf.UserEnvVarsStartIndex,
-		},
 	}
 
 	var err *multierror.Error
@@ -485,6 +481,13 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			subIDs = append(subIDs, strings.TrimSpace(sub))
 		}
 		pConf.SubnetIDs = &subIDs
+	}
+
+	if envVal, ok := annotations[AnnotationKeyPodTitusSystemEnvVarNames]; ok {
+		envsSplit := strings.Split(strings.TrimSpace(envVal), ",")
+		for _, env := range envsSplit {
+			pConf.SystemEnvVarNames = append(pConf.SystemEnvVarNames, strings.TrimSpace(env))
+		}
 	}
 
 	if pConf.SchedPolicy != nil && *pConf.SchedPolicy != "batch" && *pConf.SchedPolicy != "idle" {
