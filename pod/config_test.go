@@ -101,6 +101,7 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyNetworkSecurityGroups:         "sg-1 , sg-2 ",
 		AnnotationKeyNetworkStaticIPAllocationUUID: "static-ip-alloc-id",
 		AnnotationKeyNetworkSubnetIDs:              "subnet-1 , subnet-2 ",
+		AnnotationKeyPodTitusSystemEnvVarNames:     "SYSTEM1 , SYSTEM2 ",
 
 		// We don't parse these right now - including them so that
 		// tests fail if we do start parsing them or remove them
@@ -137,10 +138,9 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyPodTitusEntrypointShellSplitting: "true",
 
 		// ints
-		AnnotationKeyPodSchemaVersion:                "2",
-		AnnotationKeyJobAcceptedTimestampMs:          "1602201163007",
-		AnnotationKeyPodOomScoreAdj:                  "-800",
-		AnnotationKeyPodTitusSystemEnvVarsStartIndex: "4",
+		AnnotationKeyPodSchemaVersion:       "2",
+		AnnotationKeyJobAcceptedTimestampMs: "1602201163007",
+		AnnotationKeyPodOomScoreAdj:         "-800",
 
 		// resource values
 		AnnotationKeyEgressBandwidth:  "10M",
@@ -219,11 +219,11 @@ func TestParsePod(t *testing.T) {
 		Sidecars: []Sidecar{
 			{Name: "servicemesh", Enabled: true, Image: "titusops/servicemesh:latest", Version: 2},
 		},
-		StaticIPAllocationUUID:  ptr.StringPtr("static-ip-alloc-id"),
-		SubnetIDs:               &subnetIDs,
-		SystemEnvVarsStartIndex: uint32Ptr(4),
-		TaskID:                  ptr.StringPtr("task-id-in-label"),
-		TTYEnabled:              ptr.BoolPtr(true),
+		StaticIPAllocationUUID: ptr.StringPtr("static-ip-alloc-id"),
+		SubnetIDs:              &subnetIDs,
+		SystemEnvVarNames:      []string{"SYSTEM1", "SYSTEM2"},
+		TaskID:                 ptr.StringPtr("task-id-in-label"),
+		TTYEnabled:             ptr.BoolPtr(true),
 	}
 	assert.DeepEqual(t, expConf, *conf)
 }
@@ -250,12 +250,6 @@ func TestParsePodInvalid(t *testing.T) {
 				AnnotationKeyPodSchemaVersion: "-2",
 			},
 			errMatch: "annotation is not a valid uint32 value: " + AnnotationKeyPodSchemaVersion,
-		},
-		{
-			annotations: map[string]string{
-				AnnotationKeyPodTitusSystemEnvVarsStartIndex: "-2",
-			},
-			errMatch: "annotation is not a valid uint32 value: " + AnnotationKeyPodTitusSystemEnvVarsStartIndex,
 		},
 		{
 			annotations: map[string]string{
