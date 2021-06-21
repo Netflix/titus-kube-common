@@ -97,6 +97,7 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyNetworkElasticIPPool:    "pool-1",
 		AnnotationKeyNetworkElasticIPs:       "eip-1,eip-2",
 		AnnotationKeyNetworkIMDSRequireToken: "require-token",
+		AnnotationKeyNetworkMode:             "example-network-mode",
 		// Spaces intentionally added: we need to trim these
 		AnnotationKeyNetworkSecurityGroups:         "sg-1 , sg-2 ",
 		AnnotationKeyNetworkStaticIPAllocationUUID: "static-ip-alloc-id",
@@ -204,6 +205,7 @@ func TestParsePod(t *testing.T) {
 		LogS3BucketName:          ptr.StringPtr("bucket-name"),
 		LogS3PathPrefix:          ptr.StringPtr("s3-prefix"),
 		LogS3WriterIAMRole:       ptr.StringPtr("arn:aws:iam::0:role/LogWriterRole"),
+		NetworkMode:              ptr.StringPtr("example-network-mode"),
 		NetworkBurstingEnabled:   ptr.BoolPtr(true),
 		OomScoreAdj:              ptr.Int32Ptr(-800),
 		PodSchemaVersion:         uint32Ptr(2),
