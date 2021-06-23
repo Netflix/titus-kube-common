@@ -23,7 +23,7 @@ metadata:
     pod.titus.netflix.com/container-info: "<base64 containerInfo>"
     v3.job.titus.netflix.com/descriptor: "<base64 encoded, gzipped job descriptor>"
     pod.titus.netflix.com/entrypoint-shell-splitting-enabled: "true"
-    pod.titus.netflix.com/user-env-vars-start-index: "12"
+    pod.titus.netflix.com/system-env-var-names: "TITUS_TASK_ID,NETFLIX_EXECUTOR"
 
     # networking - used by the Titus CNI
 
@@ -122,6 +122,12 @@ spec:
         nvidia.com/gpu: "0"
         titus/network: "128"
     env:
+    # set by the Titus Job Co-ordinator
+    - name: TITUS_TASK_ID
+      value: "46b59bd7-3d02-42c3-951e-cdbaa60f66e2"
+    # set by the Titus Job Co-ordinator
+    - name: NETFLIX_EXECUTOR
+      value: "titus"
     - name: FOO
       value: "env var value"
       # required if using systemd
