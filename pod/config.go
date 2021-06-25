@@ -44,6 +44,7 @@ type Config struct {
 	LogS3WriterIAMRole       *string
 	LogS3BucketName          *string
 	LogS3PathPrefix          *string
+	NetworkMode              *string
 	NetworkBurstingEnabled   *bool
 	OomScoreAdj              *int32
 	PodSchemaVersion         *uint32

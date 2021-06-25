@@ -79,7 +79,6 @@ const (
 	AnnotationKeyPodTitusSystemEnvVarNames = "pod.titus.netflix.com/system-env-var-names"
 
 	// networking - used by the Titus CNI
-
 	AnnotationKeySubnetsLegacy             = "network.titus.netflix.com/subnets"
 	AnnotationKeyAccountIDLegacy           = "network.titus.netflix.com/accountId"
 	AnnotationKeyNetworkAccountID          = "network.netflix.com/account-id"
@@ -89,6 +88,7 @@ const (
 	AnnotationKeyNetworkElasticIPs         = "network.netflix.com/elastic-ips"
 	AnnotationKeyNetworkIMDSRequireToken   = "network.netflix.com/imds-require-token"
 	AnnotationKeyNetworkJumboFramesEnabled = "network.netflix.com/jumbo-frames-enabled"
+	AnnotationKeyNetworkMode               = "network.netflix.com/network-mode"
 	AnnotationKeyNetworkSecurityGroups     = "network.netflix.com/security-groups"
 	AnnotationKeyNetworkSubnetIDs          = "network.netflix.com/subnet-ids"
 	// TODO: deprecate this in favor of using the UUID annotation below
@@ -357,6 +357,10 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		{
 			key:   AnnotationKeySecurityWorkloadMetadataSig,
 			field: &pConf.WorkloadMetadataSig,
+		},
+		{
+			key:   AnnotationKeyNetworkMode,
+			field: &pConf.NetworkMode,
 		},
 	}
 
