@@ -502,6 +502,9 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		err = multierror.Append(err, sErr)
 	}
 
+	if err == nil {
+		return nil
+	}
 	return err.ErrorOrNil()
 }
 
@@ -563,7 +566,10 @@ func parseServiceAnnotations(annotations map[string]string, pConf *Config) error
 		pConf.Sidecars = append(pConf.Sidecars, sc)
 	}
 
-	return err
+	if err == nil {
+		return nil
+	}
+	return err.ErrorOrNil()
 }
 
 // PodSchemaVersion returns the pod schema version used to create a pod.
