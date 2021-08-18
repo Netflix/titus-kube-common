@@ -46,4 +46,3 @@ func ParseStringList(data map[string]string, key string, defaultValue []string) 
 	}
 	return defaultValue
 }
-
