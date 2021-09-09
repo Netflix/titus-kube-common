@@ -159,6 +159,13 @@ const (
 	// service configuration
 
 	AnnotationKeyServicePrefix = "service.netflix.com"
+
+	// sidecar configuration
+
+	AnnotationKeyPrefixSidecars                      = "titusParameter.agent.sidecars"
+	AnnotationKeySuffixSidecarsChannelOverride       = "channel-override"
+	AnnotationKeySuffixSidecarsChannelOverrideReason = "channel-override-reason"
+	AnnotationKeySidecarsInclude                     = AnnotationKeyPrefixSidecars + "/include"
 )
 
 func validateImage(image string) error {
@@ -595,4 +602,9 @@ func IsPlatformSidecarContainer(name string, pod *corev1.Pod) bool {
 	containerTypeAnnotation := AnnotationKeyPrefixContainerType + name
 	value := pod.Annotations[containerTypeAnnotation]
 	return value == AnnotationValueContainerTypePlatformSidecar
+}
+
+// SidecarAnnotation forms an annotation key referencing a particular sidecar.
+func SidecarAnnotation(sidecarName, suffix string) string {
+	return fmt.Sprintf("%s.%s/%s", AnnotationKeyPrefixSidecars, sidecarName, suffix)
 }
