@@ -162,10 +162,11 @@ const (
 
 	// sidecar configuration
 
-	AnnotationKeyPrefixSidecars                      = "titusParameter.agent.sidecars"
+	AnnotationKeySuffixSidecars                      = "platform-sidecars.netflix.com"
+	AnnotationKeyPrefixSidecarsLegacy                = "titusParameter.agent.sidecars"
 	AnnotationKeySuffixSidecarsChannelOverride       = "channel-override"
 	AnnotationKeySuffixSidecarsChannelOverrideReason = "channel-override-reason"
-	AnnotationKeySidecarsInclude                     = AnnotationKeyPrefixSidecars + "/include"
+	AnnotationKeySidecarsIncludeLegacy               = AnnotationKeyPrefixSidecarsLegacy + "/include"
 )
 
 func validateImage(image string) error {
@@ -606,5 +607,22 @@ func IsPlatformSidecarContainer(name string, pod *corev1.Pod) bool {
 
 // SidecarAnnotation forms an annotation key referencing a particular sidecar.
 func SidecarAnnotation(sidecarName, suffix string) string {
-	return fmt.Sprintf("%s.%s/%s", AnnotationKeyPrefixSidecars, sidecarName, suffix)
+	return fmt.Sprintf("%s.%s/%s", sidecarName, AnnotationKeySuffixSidecars, suffix)
+}
+
+// LegacySidecarAnnotation forms an annotation key referencing a particular
+// sidecar in the old format.
+// TODO(aaronl): Remove this once we've fully transitioned to the new format.
+func LegacySidecarAnnotation(sidecarName, suffix string) string {
+	return fmt.Sprintf("%s.%s/%s", AnnotationKeyPrefixSidecarsLegacy, sidecarName, suffix)
+}
+
+// SidecarAnnotations returns both current and legacy forms of an annotation key
+// referencing a particular sidecar.
+// TODO(aaronl): Remove this once we've fully transitioned to the new format.
+func SidecarAnnotations(sidecarName, suffix string) []string {
+	return []string{
+		SidecarAnnotation(sidecarName, suffix),
+		LegacySidecarAnnotation(sidecarName, suffix),
+	}
 }
