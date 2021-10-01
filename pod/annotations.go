@@ -626,3 +626,54 @@ func SidecarAnnotations(sidecarName, suffix string) []string {
 		LegacySidecarAnnotation(sidecarName, suffix),
 	}
 }
+
+type PlatformSidecar struct {
+	Name     string
+	Channel  string
+	ArgsJSON []byte
+}
+
+// PlatformSidecars parses sidecar-related annotations and returns a structured
+// slice of platform sidecars.
+func PlatformSidecars(annotations map[string]string) []PlatformSidecar {
+	// Look for legacy include annotation
+	var sidecarNames []string
+	if sidecarList := annotations[AnnotationKeySidecarsIncludeLegacy]; sidecarList != "" {
+		sidecarNames = strings.Split(sidecarList, " ")
+	}
+
+	// Handle the current include annotation format
+	for a, val := range annotations {
+		if strings.HasSuffix(a, "."+AnnotationKeySuffixSidecars) {
+			if boolVal, _ := strconv.ParseBool(val); boolVal {
+				sidecarNames = append(sidecarNames, strings.TrimSuffix(a, "."+AnnotationKeySuffixSidecars))
+			}
+		}
+	}
+
+	var sidecars []PlatformSidecar
+	for _, sidecarName := range sidecarNames {
+		sidecar := PlatformSidecar{
+			Name:    sidecarName,
+			Channel: "default",
+		}
+		for _, key := range SidecarAnnotations(sidecarName, "channel") {
+			if channel, ok := annotations[key]; ok {
+				sidecar.Channel = channel
+				break
+			}
+		}
+
+		for _, key := range []string{
+			SidecarAnnotation(sidecarName, "arguments"),
+			LegacySidecarAnnotation(sidecarName, "args"),
+		} {
+			if args, ok := annotations[key]; ok {
+				sidecar.ArgsJSON = []byte(args)
+			}
+		}
+
+		sidecars = append(sidecars, sidecar)
+	}
+	return sidecars
+}
