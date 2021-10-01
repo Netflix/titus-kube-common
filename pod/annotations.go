@@ -617,16 +617,6 @@ func LegacySidecarAnnotation(sidecarName, suffix string) string {
 	return fmt.Sprintf("%s.%s/%s", AnnotationKeyPrefixSidecarsLegacy, sidecarName, suffix)
 }
 
-// SidecarAnnotations returns both current and legacy forms of an annotation key
-// referencing a particular sidecar.
-// TODO(aaronl): Remove this once we've fully transitioned to the new format.
-func SidecarAnnotations(sidecarName, suffix string) []string {
-	return []string{
-		SidecarAnnotation(sidecarName, suffix),
-		LegacySidecarAnnotation(sidecarName, suffix),
-	}
-}
-
 type PlatformSidecar struct {
 	Name     string
 	Channel  string
@@ -657,7 +647,10 @@ func PlatformSidecars(annotations map[string]string) []PlatformSidecar {
 			Name:    sidecarName,
 			Channel: "default",
 		}
-		for _, key := range SidecarAnnotations(sidecarName, "channel") {
+		for _, key := range []string{
+			SidecarAnnotation(sidecarName, "channel"),
+			LegacySidecarAnnotation(sidecarName, "channel"),
+		} {
 			if channel, ok := annotations[key]; ok {
 				sidecar.Channel = channel
 				break
