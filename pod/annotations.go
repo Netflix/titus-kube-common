@@ -166,6 +166,7 @@ const (
 	AnnotationKeyPrefixSidecarsLegacy                = "titusParameter.agent.sidecars"
 	AnnotationKeySuffixSidecarsChannelOverride       = "channel-override"
 	AnnotationKeySuffixSidecarsChannelOverrideReason = "channel-override-reason"
+	AnnotationKeySuffixSidecarsVersion               = "version"
 	AnnotationKeySidecarsIncludeLegacy               = AnnotationKeyPrefixSidecarsLegacy + "/include"
 )
 
