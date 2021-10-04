@@ -651,7 +651,7 @@ func PlatformSidecars(annotations map[string]string) []PlatformSidecar {
 			SidecarAnnotation(sidecarName, "channel"),
 			LegacySidecarAnnotation(sidecarName, "channel"),
 		} {
-			if channel, ok := annotations[key]; ok {
+			if channel, ok := annotations[key]; ok && channel != "" {
 				sidecar.Channel = channel
 				break
 			}
