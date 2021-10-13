@@ -179,7 +179,6 @@ func TestParsePod(t *testing.T) {
 		WorkloadSequence:         ptr.StringPtr("v000"),
 		WorkloadStack:            ptr.StringPtr("mystack"),
 		AssignIPv6Address:        ptr.BoolPtr(true),
-		BytesEnabled:             ptr.BoolPtr(true),
 		CapacityGroup:            ptr.StringPtr("DEFAULT"),
 		ContainerInfo:            ptr.StringPtr("cinfo"),
 		CPUBurstingEnabled:       ptr.BoolPtr(true),
@@ -314,12 +313,6 @@ func TestParsePodInvalid(t *testing.T) {
 		_, err := PodToConfig(pod)
 		assert.ErrorContains(t, err, ann.errMatch)
 	}
-
-	pod := buildPod(map[string]string{}, map[string]string{
-		LabelKeyByteUnitsEnabled: "yep",
-	})
-	_, err := PodToConfig(pod)
-	assert.ErrorContains(t, err, "label is not a valid boolean value: "+LabelKeyByteUnitsEnabled)
 }
 
 func TestBadBoolAnnotations(t *testing.T) {
@@ -388,4 +381,3 @@ func TestServiceAnnotations(t *testing.T) {
 }
 
 // XXX: test all nil
-// XXX: test resources when bytes enabled
