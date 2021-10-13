@@ -1,9 +1,6 @@
 package pod
 
 import (
-	"fmt"
-	"strconv"
-
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -32,16 +29,6 @@ const (
 	LabelKeyWorkloadSequence = "workload.netflix.com/sequence"
 )
 
-// Is the control plane indicating that it's sending the resources in bytes?
-func ByteUnitsEnabled(pod *corev1.Pod) (bool, error) {
-	bytesEnabled, ok := pod.GetLabels()[LabelKeyByteUnitsEnabled]
-	if !ok {
-		return false, nil
-	}
-
-	return strconv.ParseBool(bytesEnabled)
-}
-
 func parseLabels(pod *corev1.Pod, pConf *Config) error {
 	labels := pod.GetLabels()
 
@@ -55,15 +42,6 @@ func parseLabels(pod *corev1.Pod, pConf *Config) error {
 	tVal, ok := labels[LabelKeyTaskId]
 	if ok {
 		pConf.TaskID = &tVal
-	}
-
-	bytesEnabledStr, ok := pod.GetLabels()[LabelKeyByteUnitsEnabled]
-	if ok {
-		val, err := strconv.ParseBool(bytesEnabledStr)
-		if err != nil {
-			return fmt.Errorf("label is not a valid boolean value: %s", LabelKeyByteUnitsEnabled)
-		}
-		pConf.BytesEnabled = &val
 	}
 
 	return nil

@@ -17,7 +17,6 @@ type Config struct {
 	AssignIPv6Address        *bool
 	AccountID                *string
 	AppArmorProfile          *string
-	BytesEnabled             *bool
 	CapacityGroup            *string
 	CPUBurstingEnabled       *bool
 	ContainerInfo            *string
