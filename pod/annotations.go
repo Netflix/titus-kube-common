@@ -170,10 +170,10 @@ const (
 	AnnotationKeySidecarsIncludeLegacy               = AnnotationKeyPrefixSidecarsLegacy + "/include"
 
 	// scheduling soft SLAs
-	AnnotationKeySchedLatencyReq      = "scheduler.titus.netflix.com/sched-latency-req"
+	AnnotationKeySchedLatencyReq      = "scheduler.titus.netflix.com/sched-latency-req" // priority handling in scheduling queue
 	AnnotationValSchedLatencyDelay    = "delay"
 	AnnotationValSchedLatencyFast     = "fast"
-	AnnotationKeySchedSpreadingReq    = "scheduler.titus.netflix.com/spreading-req"
+	AnnotationKeySchedSpreadingReq    = "scheduler.titus.netflix.com/spreading-req" // dynamic spreading behavior
 	AnnotationValSchedSpreadingPack   = "pack"
 	AnnotationValSchedSpreadingSpread = "spread"
 )
