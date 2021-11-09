@@ -168,6 +168,14 @@ const (
 	AnnotationKeySuffixSidecarsChannelOverrideReason = "channel-override-reason"
 	AnnotationKeySuffixSidecarsRelease               = "release" // release = $channel/$version
 	AnnotationKeySidecarsIncludeLegacy               = AnnotationKeyPrefixSidecarsLegacy + "/include"
+
+	// scheduling soft SLAs
+	AnnotationKeySchedLatencyReq      = "scheduler.titus.netflix.com/sched-latency-req"
+	AnnotationValSchedLatencyDelay    = "delay"
+	AnnotationValSchedLatencyFast     = "fast"
+	AnnotationKeySchedSpreadingReq    = "scheduler.titus.netflix.com/spreading-req"
+	AnnotationValSchedSpreadingPack   = "pack"
+	AnnotationValSchedSpreadingSpread = "spread"
 )
 
 func validateImage(image string) error {
