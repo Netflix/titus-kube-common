@@ -163,11 +163,9 @@ const (
 	// sidecar configuration
 
 	AnnotationKeySuffixSidecars                      = "platform-sidecars.netflix.com"
-	AnnotationKeyPrefixSidecarsLegacy                = "titusParameter.agent.sidecars"
 	AnnotationKeySuffixSidecarsChannelOverride       = "channel-override"
 	AnnotationKeySuffixSidecarsChannelOverrideReason = "channel-override-reason"
 	AnnotationKeySuffixSidecarsRelease               = "release" // release = $channel/$version
-	AnnotationKeySidecarsIncludeLegacy               = AnnotationKeyPrefixSidecarsLegacy + "/include"
 
 	// scheduling soft SLAs
 	AnnotationKeySchedLatencyReq      = "scheduler.titus.netflix.com/sched-latency-req" // priority handling in scheduling queue
@@ -624,13 +622,6 @@ func SidecarAnnotation(sidecarName, suffix string) string {
 	return fmt.Sprintf("%s.%s/%s", sidecarName, AnnotationKeySuffixSidecars, suffix)
 }
 
-// LegacySidecarAnnotation forms an annotation key referencing a particular
-// sidecar in the old format.
-// TODO(aaronl): Remove this once we've fully transitioned to the new format.
-func LegacySidecarAnnotation(sidecarName, suffix string) string {
-	return fmt.Sprintf("%s.%s/%s", AnnotationKeyPrefixSidecarsLegacy, sidecarName, suffix)
-}
-
 type PlatformSidecar struct {
 	Name     string
 	Channel  string
@@ -640,13 +631,8 @@ type PlatformSidecar struct {
 // PlatformSidecars parses sidecar-related annotations and returns a structured
 // slice of platform sidecars.
 func PlatformSidecars(annotations map[string]string) []PlatformSidecar {
-	// Look for legacy include annotation
-	var sidecarNames []string
-	if sidecarList := annotations[AnnotationKeySidecarsIncludeLegacy]; sidecarList != "" {
-		sidecarNames = strings.Split(sidecarList, " ")
-	}
 
-	// Handle the current include annotation format
+	sidecarNames := []string{}
 	for a, val := range annotations {
 		if strings.HasSuffix(a, "."+AnnotationKeySuffixSidecars) {
 			if boolVal, _ := strconv.ParseBool(val); boolVal {
@@ -661,25 +647,14 @@ func PlatformSidecars(annotations map[string]string) []PlatformSidecar {
 			Name:    sidecarName,
 			Channel: "default",
 		}
-		for _, key := range []string{
-			SidecarAnnotation(sidecarName, "channel"),
-			LegacySidecarAnnotation(sidecarName, "channel"),
-		} {
-			if channel, ok := annotations[key]; ok && channel != "" {
-				sidecar.Channel = channel
-				break
-			}
+		channelKey := SidecarAnnotation(sidecarName, "channel")
+		if channel, ok := annotations[channelKey]; ok && channel != "" {
+			sidecar.Channel = channel
 		}
-
-		for _, key := range []string{
-			SidecarAnnotation(sidecarName, "arguments"),
-			LegacySidecarAnnotation(sidecarName, "args"),
-		} {
-			if args, ok := annotations[key]; ok {
-				sidecar.ArgsJSON = []byte(args)
-			}
+		argumentsKey := SidecarAnnotation(sidecarName, "arguments")
+		if args, ok := annotations[argumentsKey]; ok {
+			sidecar.ArgsJSON = []byte(args)
 		}
-
 		sidecars = append(sidecars, sidecar)
 	}
 	return sidecars
