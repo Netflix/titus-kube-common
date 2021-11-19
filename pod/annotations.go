@@ -77,6 +77,9 @@ const (
 	AnnotationKeyPodTitusEntrypointShellSplitting = "pod.titus.netflix.com/entrypoint-shell-splitting-enabled"
 	// AnnotationKeyPodTitusSystemEnvVarNames tells the executor the names of the system-specified environment variables
 	AnnotationKeyPodTitusSystemEnvVarNames = "pod.titus.netflix.com/system-env-var-names"
+	// AnnotationKeyImageTagPrefix stores the original tag for the an image.
+	// This is because on the v1 pod image field, there is only room for the digest and no room for the tag it came from
+	AnnotationKeyImageTagPrefix = "pod.titus.netflix.com/image-tag-"
 
 	// networking - used by the Titus CNI
 	AnnotationKeySubnetsLegacy             = "network.titus.netflix.com/subnets"
