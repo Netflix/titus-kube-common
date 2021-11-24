@@ -55,6 +55,7 @@ type Config struct {
 	SchedPolicy              *string
 	SeccompAgentNetEnabled   *bool
 	SeccompAgentPerfEnabled  *bool
+	TrafficSteeringEnabled   *bool
 	SecurityGroupIDs         *[]string
 	Sidecars                 []Sidecar
 	StaticIPAllocationUUID   *string

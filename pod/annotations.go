@@ -141,6 +141,7 @@ const (
 	AnnotationKeyPodSchedPolicy             = "pod.netflix.com/sched-policy"
 	AnnotationKeyPodSeccompAgentNetEnabled  = "pod.netflix.com/seccomp-agent-net-enabled"
 	AnnotationKeyPodSeccompAgentPerfEnabled = "pod.netflix.com/seccomp-agent-perf-enabled"
+	AnnotationKeyPodTrafficSteeringEnabled  = "pod.netflix.com/traffic-steering-enabled"
 
 	// container annotations (specified on a pod about a container)
 	// Specific containers indicate they want to set something by appending
@@ -243,6 +244,10 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		{
 			key:   AnnotationKeyPodSeccompAgentPerfEnabled,
 			field: &pConf.SeccompAgentPerfEnabled,
+		},
+		{
+			key:   AnnotationKeyPodTrafficSteeringEnabled,
+			field: &pConf.TrafficSteeringEnabled,
 		},
 		{
 			key:   AnnotationKeyPodTitusEntrypointShellSplitting,
