@@ -27,6 +27,7 @@ type Config struct {
 	FuseEnabled              *bool
 	HostnameStyle            *string
 	IAMRole                  *string
+	InjectedEnvVarNames      []string
 	IngressBandwidth         *resource.Quantity
 	IMDSRequireToken         *string
 	JobAcceptedTimestampMs   *uint64

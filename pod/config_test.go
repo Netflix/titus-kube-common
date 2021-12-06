@@ -104,6 +104,7 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyNetworkStaticIPAllocationUUID: "static-ip-alloc-id",
 		AnnotationKeyNetworkSubnetIDs:              "subnet-1 , subnet-2 ",
 		AnnotationKeyPodTitusSystemEnvVarNames:     "SYSTEM1 , SYSTEM2 ",
+		AnnotationKeyPodInjectedEnvVarNames:        "MUTATED1 , MUTATED2 ",
 
 		// We don't parse these right now - including them so that
 		// tests fail if we do start parsing them or remove them
@@ -224,6 +225,7 @@ func TestParsePod(t *testing.T) {
 		StaticIPAllocationUUID: ptr.StringPtr("static-ip-alloc-id"),
 		SubnetIDs:              &subnetIDs,
 		SystemEnvVarNames:      []string{"SYSTEM1", "SYSTEM2"},
+		InjectedEnvVarNames:    []string{"MUTATED1", "MUTATED2"},
 		TaskID:                 ptr.StringPtr("task-id-in-label"),
 		TTYEnabled:             ptr.BoolPtr(true),
 	}
