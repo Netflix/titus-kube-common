@@ -77,6 +77,9 @@ const (
 	AnnotationKeyPodTitusEntrypointShellSplitting = "pod.titus.netflix.com/entrypoint-shell-splitting-enabled"
 	// AnnotationKeyPodTitusSystemEnvVarNames tells the executor the names of the system-specified environment variables
 	AnnotationKeyPodTitusSystemEnvVarNames = "pod.titus.netflix.com/system-env-var-names"
+	// AnnotationKeyPodInjectedEnvVarNames tells the executor the names of the externally-injected environment variables,
+	// which neither come from the user nor titus itself, and should be ignored for identify verification purposes
+	AnnotationKeyPodInjectedEnvVarNames = "pod.titus.netflix.com/injected-env-var-names"
 	// AnnotationKeyImageTagPrefix stores the original tag for the an image.
 	// This is because on the v1 pod image field, there is only room for the digest and no room for the tag it came from
 	AnnotationKeyImageTagPrefix = "pod.titus.netflix.com/image-tag-"
@@ -511,6 +514,13 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		envsSplit := strings.Split(strings.TrimSpace(envVal), ",")
 		for _, env := range envsSplit {
 			pConf.SystemEnvVarNames = append(pConf.SystemEnvVarNames, strings.TrimSpace(env))
+		}
+	}
+
+	if envVal, ok := annotations[AnnotationKeyPodInjectedEnvVarNames]; ok {
+		envsSplit := strings.Split(strings.TrimSpace(envVal), ",")
+		for _, env := range envsSplit {
+			pConf.InjectedEnvVarNames = append(pConf.InjectedEnvVarNames, strings.TrimSpace(env))
 		}
 	}
 
