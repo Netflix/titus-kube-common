@@ -242,49 +242,49 @@ func TestParsePodInvalid(t *testing.T) {
 			annotations: map[string]string{
 				AnnotationKeyPodHostnameStyle: "not-ec2",
 			},
-			errMatch: "annotation is not a valid hostname style: " + AnnotationKeyPodHostnameStyle,
+			errMatch: "pod.netflix.com/hostname-style annotation is not a valid hostname style: not-ec2",
 		},
 		{
 			annotations: map[string]string{
 				AnnotationKeyLogKeepLocalFile: "yes",
 			},
-			errMatch: "annotation is not a valid boolean value: " + AnnotationKeyLogKeepLocalFile,
+			errMatch: "log.netflix.com/keep-local-file-after-upload annotation is not a valid boolean value yes: strconv.ParseBool",
 		},
 		{
 			annotations: map[string]string{
 				AnnotationKeyPodSchemaVersion: "-2",
 			},
-			errMatch: "annotation is not a valid uint32 value: " + AnnotationKeyPodSchemaVersion,
+			errMatch: "pod.netflix.com/pod-schema-version annotation is not a valid uint32 value -2: strconv.ParseUint",
 		},
 		{
 			annotations: map[string]string{
 				AnnotationKeyJobAcceptedTimestampMs: "-5",
 			},
-			errMatch: "annotation is not a valid uint64 value: " + AnnotationKeyJobAcceptedTimestampMs,
+			errMatch: "v3.job.titus.netflix.com/accepted-timestamp-ms annotation is not a valid uint64 value -5: strconv.ParseUint",
 		},
 		{
 			annotations: map[string]string{
 				AnnotationKeyPodOomScoreAdj: "foo",
 			},
-			errMatch: "annotation is not a valid int32 value: " + AnnotationKeyPodOomScoreAdj,
+			errMatch: "pod.netflix.com/oom-score-adj annotation is not a valid int32 value foo: strconv.ParseInt",
 		},
 		{
 			annotations: map[string]string{
 				AnnotationKeyEgressBandwidth: "10ZiB",
 			},
-			errMatch: "annotation is not a valid resource value: " + AnnotationKeyEgressBandwidth,
+			errMatch: "kubernetes.io/egress-bandwidth annotation is not a valid resource value 0: quantities must match the regular expression",
 		},
 		{
 			annotations: map[string]string{
 				AnnotationKeyLogStdioCheckInterval: "2yearz",
 			},
-			errMatch: "annotation is not a valid duration value: " + AnnotationKeyLogStdioCheckInterval,
+			errMatch: "log.netflix.com/stdio-check-interval annotation is not a valid duration value 0s: time: unknown unit",
 		},
 		{
 			annotations: map[string]string{
 				AnnotationKeyPodSchedPolicy: "something",
 			},
-			errMatch: "annotation is not a valid scheduler policy: " + AnnotationKeyPodSchedPolicy,
+			errMatch: "pod.netflix.com/sched-policy annotation is not a valid scheduler policy: something",
 		},
 		{
 			annotations: map[string]string{
@@ -296,13 +296,13 @@ func TestParsePodInvalid(t *testing.T) {
 			annotations: map[string]string{
 				AnnotationKeyServicePrefix + "/foo.vA.enabled": "true",
 			},
-			errMatch: "annotation has an incorrect service version number: service.netflix.com/foo.vA.enabled",
+			errMatch: "service.netflix.com/foo.vA.enabled annotation has an incorrect service version number",
 		},
 		{
 			annotations: map[string]string{
 				AnnotationKeyServicePrefix + "/foo.v1.enabled": "asdf",
 			},
-			errMatch: "annotation has an incorrect service enabled boolean value: service.netflix.com/foo.v1.enabled",
+			errMatch: "service.netflix.com/foo.v1.enabled annotation has an incorrect service enabled boolean value: asdf",
 		},
 		{
 			annotations: map[string]string{
@@ -336,7 +336,7 @@ func TestBadBoolAnnotations(t *testing.T) {
 	for _, ann := range boolAnnotations {
 		pod := buildPod(map[string]string{ann: "bad"}, map[string]string{})
 		_, err := PodToConfig(pod)
-		assert.ErrorContains(t, err, "annotation is not a valid boolean value: "+ann)
+		assert.ErrorContains(t, err, ann+" annotation is not a valid boolean value bad:")
 	}
 }
 
