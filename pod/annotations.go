@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/docker/distribution/reference"
-	multierror "github.com/hashicorp/go-multierror"
+	"github.com/hashicorp/go-multierror"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -169,11 +169,9 @@ const (
 	// sidecar configuration
 
 	AnnotationKeySuffixSidecars                      = "platform-sidecars.netflix.com"
-	AnnotationKeyPrefixSidecarsLegacy                = "titusParameter.agent.sidecars"
 	AnnotationKeySuffixSidecarsChannelOverride       = "channel-override"
 	AnnotationKeySuffixSidecarsChannelOverrideReason = "channel-override-reason"
 	AnnotationKeySuffixSidecarsRelease               = "release" // release = $channel/$version
-	AnnotationKeySidecarsIncludeLegacy               = AnnotationKeyPrefixSidecarsLegacy + "/include"
 
 	// scheduling soft SLAs
 	AnnotationKeySchedLatencyReq      = "scheduler.titus.netflix.com/sched-latency-req" // priority handling in scheduling queue
@@ -625,7 +623,7 @@ func ContainerAnnotation(containerName, suffix string) string {
 }
 
 // IsPlatformSidecarContainer takes a container name and pod object,
-// and can tell you if a particular container is a Platform Sidecar
+// and can tell you if a particular container is a Platform Sidecar.
 func IsPlatformSidecarContainer(name string, pod *corev1.Pod) bool {
 	platformSidecarAnnotation := ContainerAnnotation(name, AnnotationKeySuffixContainersSidecar)
 	_, ok := pod.Annotations[platformSidecarAnnotation]
@@ -637,13 +635,6 @@ func SidecarAnnotation(sidecarName, suffix string) string {
 	return fmt.Sprintf("%s.%s/%s", sidecarName, AnnotationKeySuffixSidecars, suffix)
 }
 
-// LegacySidecarAnnotation forms an annotation key referencing a particular
-// sidecar in the old format.
-// TODO(aaronl): Remove this once we've fully transitioned to the new format.
-func LegacySidecarAnnotation(sidecarName, suffix string) string {
-	return fmt.Sprintf("%s.%s/%s", AnnotationKeyPrefixSidecarsLegacy, sidecarName, suffix)
-}
-
 type PlatformSidecar struct {
 	Name     string
 	Channel  string
@@ -652,48 +643,32 @@ type PlatformSidecar struct {
 
 // PlatformSidecars parses sidecar-related annotations and returns a structured
 // slice of platform sidecars.
-func PlatformSidecars(annotations map[string]string) []PlatformSidecar {
-	// Look for legacy include annotation
-	var sidecarNames []string
-	if sidecarList := annotations[AnnotationKeySidecarsIncludeLegacy]; sidecarList != "" {
-		sidecarNames = strings.Split(sidecarList, " ")
-	}
-
-	// Handle the current include annotation format
-	for a, val := range annotations {
-		if strings.HasSuffix(a, "."+AnnotationKeySuffixSidecars) {
-			if boolVal, _ := strconv.ParseBool(val); boolVal {
-				sidecarNames = append(sidecarNames, strings.TrimSuffix(a, "."+AnnotationKeySuffixSidecars))
-			}
-		}
-	}
-
+func PlatformSidecars(annotations map[string]string) ([]PlatformSidecar, error) {
 	var sidecars []PlatformSidecar
-	for _, sidecarName := range sidecarNames {
-		sidecar := PlatformSidecar{
-			Name:    sidecarName,
-			Channel: "default",
+	for annotation, val := range annotations {
+		if !strings.HasSuffix(annotation, "."+AnnotationKeySuffixSidecars) {
+			continue
 		}
-		for _, key := range []string{
-			SidecarAnnotation(sidecarName, "channel"),
-			LegacySidecarAnnotation(sidecarName, "channel"),
-		} {
-			if channel, ok := annotations[key]; ok && channel != "" {
-				sidecar.Channel = channel
-				break
-			}
+		boolVal, err := strconv.ParseBool(val)
+		if err != nil {
+			return nil, fmt.Errorf("sidecar annotation %q must be a bool value: %v", annotation, err)
+		}
+		if !boolVal {
+			continue
 		}
 
-		for _, key := range []string{
-			SidecarAnnotation(sidecarName, "arguments"),
-			LegacySidecarAnnotation(sidecarName, "args"),
-		} {
-			if args, ok := annotations[key]; ok {
-				sidecar.ArgsJSON = []byte(args)
-			}
+		sidecar := PlatformSidecar{}
+		sidecar.Name = strings.TrimSuffix(annotation, "."+AnnotationKeySuffixSidecars)
+		channel, ok := annotations[SidecarAnnotation(sidecar.Name, "channel")]
+		if !ok {
+			return nil, fmt.Errorf("sidecar %q must have a channel specified via annotation %q", annotation, SidecarAnnotation(sidecar.Name, "channel"))
 		}
-
+		sidecar.Channel = channel
+		if args, ok := annotations[SidecarAnnotation(sidecar.Name, "arguments")]; ok {
+			sidecar.ArgsJSON = []byte(args)
+		}
 		sidecars = append(sidecars, sidecar)
 	}
-	return sidecars
+
+	return sidecars, nil
 }
