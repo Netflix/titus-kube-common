@@ -86,7 +86,7 @@ func TestPlatformSidecars(t *testing.T) {
 			annotations: map[string]string{
 				"pod.netflix.com/cpu-bursting-enabled": "true",
 			},
-			wantSidecars: nil,
+			wantSidecars: []PlatformSidecar{},
 		},
 		{
 			desc: "one platform sidecar",
@@ -158,7 +158,7 @@ func TestPlatformSidecars(t *testing.T) {
 			lessThan := func(a, b PlatformSidecar) bool {
 				return a.Name < b.Name
 			}
-			assert.Check(t, cmp.DeepEqual(tt.wantSidecars, sidecars, cmpopts.SortSlices(lessThan)), "PlatformSidecars(%+v)", tt.annotations)
+			assert.Check(t, cmp.DeepEqual(tt.wantSidecars, sidecars, cmpopts.SortSlices(lessThan), cmpopts.EquateEmpty()), "PlatformSidecars(%+v)", tt.annotations)
 		})
 	}
 }
