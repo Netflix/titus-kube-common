@@ -406,7 +406,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 
 	if hostnameStyle, ok := annotations[AnnotationKeyPodHostnameStyle]; ok {
 		if hostnameStyle != "ec2" && hostnameStyle != "" {
-			err = multierror.Append(err, fmt.Errorf("annotation is not a valid hostname style: %s", AnnotationKeyPodHostnameStyle))
+			err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid hostname style: %s", AnnotationKeyPodHostnameStyle, hostnameStyle))
 		}
 	}
 
@@ -417,7 +417,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			if pErr == nil {
 				*an.field = &boolVal
 			} else {
-				err = multierror.Append(err, fmt.Errorf("annotation is not a valid boolean value: %s", an.key))
+				err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid boolean value %s: %w", an.key, val, pErr))
 			}
 		}
 	}
@@ -430,7 +430,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 				parsedUint32 := uint32(parsedVal)
 				*an.field = &parsedUint32
 			} else {
-				err = multierror.Append(err, fmt.Errorf("annotation is not a valid uint32 value: %s", an.key))
+				err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid uint32 value %s: %w", an.key, val, pErr))
 			}
 		}
 	}
@@ -442,7 +442,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			parsedUint64 := uint64(parsedVal)
 			pConf.JobAcceptedTimestampMs = &parsedUint64
 		} else {
-			err = multierror.Append(err, fmt.Errorf("annotation is not a valid uint64 value: %s", AnnotationKeyJobAcceptedTimestampMs))
+			err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid uint64 value %s: %w", AnnotationKeyJobAcceptedTimestampMs, val, pErr))
 		}
 	}
 
@@ -453,7 +453,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			parsedInt32 := int32(parsedVal)
 			pConf.OomScoreAdj = &parsedInt32
 		} else {
-			err = multierror.Append(err, fmt.Errorf("annotation is not a valid int32 value: %s", AnnotationKeyPodOomScoreAdj))
+			err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid int32 value %s: %w", AnnotationKeyPodOomScoreAdj, val, pErr))
 		}
 	}
 
@@ -464,7 +464,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			if pErr == nil {
 				*an.field = &resVal
 			} else {
-				err = multierror.Append(err, fmt.Errorf("annotation is not a valid resource value: %s", an.key))
+				err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid resource value %s: %w", an.key, &resVal, pErr))
 			}
 		}
 	}
@@ -476,7 +476,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			if pErr == nil {
 				*an.field = &durVal
 			} else {
-				err = multierror.Append(err, fmt.Errorf("annotation is not a valid duration value: %s", an.key))
+				err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid duration value %s: %w", an.key, durVal, pErr))
 			}
 		}
 	}
@@ -486,7 +486,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		if pErr == nil {
 			pConf.LogUploadRegExp = uploadRegexp
 		} else {
-			err = multierror.Append(err, fmt.Errorf("annotation is not a valid regexp value: %s: %w", AnnotationKeyLogUploadRegexp, pErr))
+			err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid regexp value %s:  %w", uploadRegexpVal, AnnotationKeyLogUploadRegexp, pErr))
 		}
 	}
 
@@ -523,7 +523,7 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 	}
 
 	if pConf.SchedPolicy != nil && *pConf.SchedPolicy != "batch" && *pConf.SchedPolicy != "idle" {
-		err = multierror.Append(err, fmt.Errorf("annotation is not a valid scheduler policy: %s", AnnotationKeyPodSchedPolicy))
+		err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid scheduler policy: %s", AnnotationKeyPodSchedPolicy, *pConf.SchedPolicy))
 	}
 
 	if sErr := parseServiceAnnotations(annotations, pConf); sErr != nil {
@@ -560,7 +560,7 @@ func parseServiceAnnotations(annotations map[string]string, pConf *Config) error
 		if !ok {
 			vInt, vErr := strconv.Atoi(strings.TrimPrefix(version, "v"))
 			if vErr != nil {
-				err = multierror.Append(err, fmt.Errorf("annotation has an incorrect service version number: %s", k))
+				err = multierror.Append(err, fmt.Errorf("%s annotation has an incorrect service version number: %s", k, version))
 				continue
 			}
 
@@ -573,7 +573,7 @@ func parseServiceAnnotations(annotations map[string]string, pConf *Config) error
 		if param == "enabled" {
 			boolVal, pErr := strconv.ParseBool(v)
 			if pErr != nil {
-				err = multierror.Append(err, fmt.Errorf("annotation has an incorrect service enabled boolean value: %s", k))
+				err = multierror.Append(err, fmt.Errorf("%s annotation has an incorrect service enabled boolean value: %s", k, v))
 				continue
 			}
 			sc.Enabled = boolVal
