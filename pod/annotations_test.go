@@ -3,6 +3,7 @@ package pod
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"gotest.tools/assert"
 	"gotest.tools/assert/cmp"
 	corev1 "k8s.io/api/core/v1"
@@ -154,7 +155,10 @@ func TestPlatformSidecars(t *testing.T) {
 			sidecars, err := PlatformSidecars(tt.annotations)
 			assert.NilError(t, err, "PlatformSidecars(%+v)", tt.annotations)
 
-			assert.Check(t, cmp.DeepEqual(tt.wantSidecars, sidecars), "PlatformSidecars(%+v)", tt.annotations)
+			lessThan := func(a, b PlatformSidecar) bool {
+				return a.Name < b.Name
+			}
+			assert.Check(t, cmp.DeepEqual(tt.wantSidecars, sidecars, cmpopts.SortSlices(lessThan)), "PlatformSidecars(%+v)", tt.annotations)
 		})
 	}
 }
