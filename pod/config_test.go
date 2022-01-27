@@ -138,6 +138,7 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyPodKvmEnabled:                    "true",
 		AnnotationKeyPodSeccompAgentNetEnabled:        "true",
 		AnnotationKeyPodSeccompAgentPerfEnabled:       "true",
+		AnnotationKeyPodTrafficSteeringEnabled:        "true",
 		AnnotationKeyPodTitusEntrypointShellSplitting: "true",
 
 		// ints
@@ -218,6 +219,7 @@ func TestParsePod(t *testing.T) {
 		SchedPolicy:              ptr.StringPtr("batch"),
 		SeccompAgentNetEnabled:   ptr.BoolPtr(true),
 		SeccompAgentPerfEnabled:  ptr.BoolPtr(true),
+		TrafficSteeringEnabled:   ptr.BoolPtr(true),
 		SecurityGroupIDs:         &sgIDs,
 		Sidecars: []Sidecar{
 			{Name: "servicemesh", Enabled: true, Image: "titusops/servicemesh:latest", Version: 2},
@@ -330,6 +332,7 @@ func TestBadBoolAnnotations(t *testing.T) {
 		AnnotationKeyPodKvmEnabled,
 		AnnotationKeyPodSeccompAgentNetEnabled,
 		AnnotationKeyPodSeccompAgentPerfEnabled,
+		AnnotationKeyPodTrafficSteeringEnabled,
 		AnnotationKeyPodTitusEntrypointShellSplitting,
 	}
 
