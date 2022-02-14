@@ -99,8 +99,11 @@ const (
 	AnnotationKeyNetworkIMDSRequireToken   = "network.netflix.com/imds-require-token"
 	AnnotationKeyNetworkJumboFramesEnabled = "network.netflix.com/jumbo-frames-enabled"
 	AnnotationKeyNetworkMode               = "network.netflix.com/network-mode"
-	AnnotationKeyNetworkSecurityGroups     = "network.netflix.com/security-groups"
-	AnnotationKeyNetworkSubnetIDs          = "network.netflix.com/subnet-ids"
+	// AnnotationKeyEffectiveNetworkMode represents the network mode computed by the titus-executor
+	// This may not be the same as the original (potentially unset) requested network mode
+	AnnotationKeyEffectiveNetworkMode  = "network.netflix.com/effective-network-mode"
+	AnnotationKeyNetworkSecurityGroups = "network.netflix.com/security-groups"
+	AnnotationKeyNetworkSubnetIDs      = "network.netflix.com/subnet-ids"
 	// TODO: deprecate this in favor of using the UUID annotation below
 	AnnotationKeyNetworkStaticIPAllocationUUID = "network.netflix.com/static-ip-allocation-uuid"
 
