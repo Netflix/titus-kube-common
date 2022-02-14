@@ -25,10 +25,14 @@ const (
 	AnnotationKeyIngressBandwidth = "kubernetes.io/ingress-bandwidth"
 
 	// Pod ENI
+	// AnnotationKeyIPAddress represents a generic "primary", could be ipv4 or v6
+	AnnotationKeyIPAddress        = "network.netflix.com/address-ip"
 	AnnotationKeyIPv4Address      = "network.netflix.com/address-ipv4"
 	AnnotationKeyIPv4PrefixLength = "network.netflix.com/prefixlen-ipv4"
 	AnnotationKeyIPv6Address      = "network.netflix.com/address-ipv6"
 	AnnotationKeyIPv6PrefixLength = "network.netflix.com/prefixlen-ipv6"
+	// AnnotationKeyIPv4TransitionAddress represents the "NAT" ip for certain IPv6-only modes
+	AnnotationKeyIPv4TransitionAddress = "network.netflix.com/address-transition-ipv4"
 
 	AnnotationKeyBranchEniID     = "network.netflix.com/branch-eni-id"
 	AnnotationKeyBranchEniMac    = "network.netflix.com/branch-eni-mac"
