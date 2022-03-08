@@ -33,6 +33,8 @@ const (
 	AnnotationKeyIPv6PrefixLength = "network.netflix.com/prefixlen-ipv6"
 	// AnnotationKeyIPv4TransitionAddress represents the "NAT" ip for certain IPv6-only modes
 	AnnotationKeyIPv4TransitionAddress = "network.netflix.com/address-transition-ipv4"
+	AnnotationKeyElasticIPv4Address    = "network.netflix.com/address-elastic-ipv4"
+	AnnotationKeyElasticIPv6Address    = "network.netflix.com/address-elastic-ipv6"
 
 	AnnotationKeyBranchEniID     = "network.netflix.com/branch-eni-id"
 	AnnotationKeyBranchEniMac    = "network.netflix.com/branch-eni-mac"
