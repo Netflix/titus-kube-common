@@ -103,30 +103,13 @@ func PodToConfig(pod *corev1.Pod) (*Config, error) {
 	return pConf, err
 }
 
-func getWorkloadContainer(pod *corev1.Pod, pconf *Config) *corev1.Container {
-	workloadContainer := pod.Spec.Containers[0]
-	if pconf.TaskID == nil {
-		return &workloadContainer
-	}
-
-	// Find the container named after the task ID
-	for _, c := range pod.Spec.Containers {
-		if c.Name == *pconf.TaskID {
-			ctrPtr := &c
-			return ctrPtr
-		}
-	}
-
-	return &workloadContainer
-}
-
 func parsePodFields(pod *corev1.Pod, pConf *Config) error {
-	workloadContainer := getWorkloadContainer(pod, pConf)
-	if workloadContainer == nil {
-		return errors.New("could not find workload container in pod")
+	mainContainer := GetMainUserContainer(pod)
+	if mainContainer == nil {
+		return errors.New("could not find main container in pod")
 	}
 
-	resources := workloadContainer.Resources.Limits
+	resources := mainContainer.Resources.Limits
 	pConf.ResourceCPU = resourcePtr(resources, corev1.ResourceCPU)
 	pConf.ResourceDisk = resourcePtr(resources, corev1.ResourceEphemeralStorage)
 	pConf.ResourceGPU = resourcePtr(resources, resourceCommon.ResourceNameGpu)
@@ -134,7 +117,7 @@ func parsePodFields(pod *corev1.Pod, pConf *Config) error {
 	pConf.ResourceNetwork = resourcePtr(resources, resourceCommon.ResourceNameNetwork)
 	// XXX: do we need the legacy gpu and network resource names, too?
 
-	if workloadContainer.TTY {
+	if mainContainer.TTY {
 		ttyEnabled := true
 		pConf.TTYEnabled = &ttyEnabled
 	}

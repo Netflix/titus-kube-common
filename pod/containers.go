@@ -10,7 +10,6 @@ func GetMainUserContainer(pod *corev1.Pod) *corev1.Container {
 	}
 
 	// Older method where the main container's name was the taskid
-	firstContainer := pod.Spec.Containers[0]
 	for i := range pod.Spec.Containers {
 		c := &pod.Spec.Containers[i]
 		if c.Name == pod.Name {
@@ -27,7 +26,7 @@ func GetMainUserContainer(pod *corev1.Pod) *corev1.Container {
 	}
 
 	// Fallback method, whatever came first
-	return &firstContainer
+	return &pod.Spec.Containers[0]
 }
 
 func GetContainerByName(pod *corev1.Pod, name string) *corev1.Container {
