@@ -210,7 +210,7 @@ func validateImage(image string) error {
 
 func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 	annotations := pod.GetAnnotations()
-	userCtr := GetUserContainer(pod)
+	userCtr := GetMainUserContainer(pod)
 	if userCtr == nil {
 		return errors.New("no containers found in pod")
 	}

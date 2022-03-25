@@ -4,11 +4,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func GetUserContainer(pod *corev1.Pod) *corev1.Container {
+func GetMainUserContainer(pod *corev1.Pod) *corev1.Container {
 	if len(pod.Spec.Containers) == 0 {
 		return nil
 	}
 
+	// Older method where the main container's name was the taskid
 	firstContainer := pod.Spec.Containers[0]
 	for i := range pod.Spec.Containers {
 		c := &pod.Spec.Containers[i]
@@ -17,6 +18,15 @@ func GetUserContainer(pod *corev1.Pod) *corev1.Container {
 		}
 	}
 
+	// Newer method where the main container's name is "main"
+	for i := range pod.Spec.Containers {
+		c := &pod.Spec.Containers[i]
+		if c.Name == "main" {
+			return c
+		}
+	}
+
+	// Fallback method, whatever came first
 	return &firstContainer
 }
 
