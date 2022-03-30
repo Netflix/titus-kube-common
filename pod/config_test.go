@@ -103,6 +103,8 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyNetworkSecurityGroups:         "sg-1 , sg-2 ",
 		AnnotationKeyNetworkStaticIPAllocationUUID: "static-ip-alloc-id",
 		AnnotationKeyNetworkSubnetIDs:              "subnet-1 , subnet-2 ",
+		AnnotationKeyHighScaleNetworkSecurityGroups: "sg-3 , sg-4 ",
+		AnnotationKeyHighScaleNetworkSubnetIDs:     "subnet-3 , subnet-4 ",
 		AnnotationKeyPodTitusSystemEnvVarNames:     "SYSTEM1 , SYSTEM2 ",
 		AnnotationKeyPodInjectedEnvVarNames:        "MUTATED1 , MUTATED2 ",
 
@@ -171,6 +173,8 @@ func TestParsePod(t *testing.T) {
 	assert.NilError(t, err)
 	sgIDs := []string{"sg-1", "sg-2"}
 	subnetIDs := []string{"subnet-1", "subnet-2"}
+	hsSgIDs := []string{"sg-3", "sg-4"}
+	hsSubnetIDs := []string{"subnet-3", "subnet-4"}
 	expConf := Config{
 		AppArmorProfile:          ptr.StringPtr("localhost/docker_titus"),
 		AccountID:                ptr.StringPtr("123456"),
@@ -191,6 +195,8 @@ func TestParsePod(t *testing.T) {
 		EntrypointShellSplitting: ptr.BoolPtr(true),
 		FuseEnabled:              ptr.BoolPtr(true),
 		HostnameStyle:            ptr.StringPtr("ec2"),
+		HsSecurityGroups:         &hsSgIDs,
+		HsSubnetIDs:              &hsSubnetIDs,
 		IAMRole:                  ptr.StringPtr("arn:aws:iam::0:role/DefaultContainerRole"),
 		IMDSRequireToken:         ptr.StringPtr("require-token"),
 		IngressBandwidth:         stringToResourcePtr("20M"),

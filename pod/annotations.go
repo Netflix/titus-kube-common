@@ -106,6 +106,8 @@ const (
 	AnnotationKeyEffectiveNetworkMode  = "network.netflix.com/effective-network-mode"
 	AnnotationKeyNetworkSecurityGroups = "network.netflix.com/security-groups"
 	AnnotationKeyNetworkSubnetIDs      = "network.netflix.com/subnet-ids"
+	AnnotationKeyHighScaleNetworkSecurityGroups = "network.netflix.com/hs-security-groups"
+	AnnotationKeyHighScaleNetworkSubnetIDs      = "network.netflix.com/hs-subnet-ids"
 	// TODO: deprecate this in favor of using the UUID annotation below
 	AnnotationKeyNetworkStaticIPAllocationUUID = "network.netflix.com/static-ip-allocation-uuid"
 
@@ -520,6 +522,24 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 			subIDs = append(subIDs, strings.TrimSpace(sub))
 		}
 		pConf.SubnetIDs = &subIDs
+	}
+
+	if sgVal, ok := annotations[AnnotationKeyHighScaleNetworkSecurityGroups]; ok {
+		sgsSplit := strings.Split(strings.TrimSpace(sgVal), ",")
+		sgIDs := []string{}
+		for _, sg := range sgsSplit {
+			sgIDs = append(sgIDs, strings.TrimSpace(sg))
+		}
+		pConf.HsSecurityGroups = &sgIDs
+	}
+
+	if subVal, ok := annotations[AnnotationKeyHighScaleNetworkSubnetIDs]; ok {
+		subsSplit := strings.Split(strings.TrimSpace(subVal), ",")
+		subIDs := []string{}
+		for _, sub := range subsSplit {
+			subIDs = append(subIDs, strings.TrimSpace(sub))
+		}
+		pConf.HsSubnetIDs = &subIDs
 	}
 
 	if envVal, ok := annotations[AnnotationKeyPodTitusSystemEnvVarNames]; ok {

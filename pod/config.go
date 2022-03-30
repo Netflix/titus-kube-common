@@ -26,6 +26,8 @@ type Config struct {
 	EntrypointShellSplitting *bool
 	FuseEnabled              *bool
 	HostnameStyle            *string
+	HsSecurityGroups         *[]string
+	HsSubnetIDs              *[]string
 	IAMRole                  *string
 	InjectedEnvVarNames      []string
 	IngressBandwidth         *resource.Quantity
