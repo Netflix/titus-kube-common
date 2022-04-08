@@ -181,13 +181,16 @@ const (
 	AnnotationKeySuffixSidecars                      = "platform-sidecars.netflix.com"
 	AnnotationKeySuffixSidecarsChannelOverride       = "channel-override"
 	AnnotationKeySuffixSidecarsChannelOverrideReason = "channel-override-reason"
-	AnnotationKeySuffixSidecarsRelease               = "release" // release = $channel/$version
+	// release = $channel/$version
+	AnnotationKeySuffixSidecarsRelease = "release"
 
 	// scheduling soft SLAs
-	AnnotationKeySchedLatencyReq      = "scheduler.titus.netflix.com/sched-latency-req" // priority handling in scheduling queue
-	AnnotationValSchedLatencyDelay    = "delay"
-	AnnotationValSchedLatencyFast     = "fast"
-	AnnotationKeySchedSpreadingReq    = "scheduler.titus.netflix.com/spreading-req" // dynamic spreading behavior
+	// priority handling in scheduling queue
+	AnnotationKeySchedLatencyReq   = "scheduler.titus.netflix.com/sched-latency-req"
+	AnnotationValSchedLatencyDelay = "delay"
+	AnnotationValSchedLatencyFast  = "fast"
+	// dynamic spreading behavior
+	AnnotationKeySchedSpreadingReq    = "scheduler.titus.netflix.com/spreading-req"
 	AnnotationValSchedSpreadingPack   = "pack"
 	AnnotationValSchedSpreadingSpread = "spread"
 )
