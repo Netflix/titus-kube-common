@@ -120,7 +120,7 @@ const (
 	AnnotationKeySecurityWorkloadMetadata    = "security.netflix.com/workload-metadata"
 	AnnotationKeySecurityWorkloadMetadataSig = "security.netflix.com/workload-metadata-sig"
 
-	// opportunistic resources (see control-plane and scheduler code)
+	// opportunistic resources (see control-plane and scheduler code) - deprecated
 
 	// AnnotationKeyOpportunisticCPU - assigned opportunistic CPUs
 	AnnotationKeyOpportunisticCPU = "opportunistic.scheduler.titus.netflix.com/cpu"
@@ -193,6 +193,11 @@ const (
 	AnnotationKeySchedSpreadingReq    = "scheduler.titus.netflix.com/spreading-req"
 	AnnotationValSchedSpreadingPack   = "pack"
 	AnnotationValSchedSpreadingSpread = "spread"
+
+	// duration prediction v3
+	AnnotationKeyPredRuntimeQuantiles = "runtime.predictions.titus.netflix.com/quantiles"
+	AnnotationKeyPredRuntimeModelVersion = "runtime.predictions.titus.netflix.com/model-version"
+	AnnotationKeyPredRuntimeModelID = "runtime.predictions.titus.netflix.com/model-id"
 )
 
 func validateImage(image string) error {
