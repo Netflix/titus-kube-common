@@ -195,9 +195,9 @@ const (
 	AnnotationValSchedSpreadingSpread = "spread"
 
 	// duration prediction v3
-	AnnotationKeyPredRuntimeQuantiles = "runtime.predictions.titus.netflix.com/quantiles"
+	AnnotationKeyPredRuntimeQuantiles    = "runtime.predictions.titus.netflix.com/quantiles"
 	AnnotationKeyPredRuntimeModelVersion = "runtime.predictions.titus.netflix.com/model-version"
-	AnnotationKeyPredRuntimeModelID = "runtime.predictions.titus.netflix.com/model-id"
+	AnnotationKeyPredRuntimeModelID      = "runtime.predictions.titus.netflix.com/model-id"
 )
 
 func validateImage(image string) error {
