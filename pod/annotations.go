@@ -158,8 +158,15 @@ const (
 	// container annotations (specified on a pod about a container)
 	// Specific containers indicate they want to set something by appending
 	// a prefix key with their container name ($name.containers.netflix.com).
+	// Use the pod.ContainerAnnotation() function to help construct the annotation key
 	AnnotationKeySuffixContainers        = "containers.netflix.com"
 	AnnotationKeySuffixContainersSidecar = "platform-sidecar"
+	// AnnotationKeySuffixContainersCapabilities is a per-container annotation that sets
+	// the Titus ContainerCapabilities setting for that container.
+	// Values of this annotation should be the string value in the protobuf enum,
+	// but without the `ContainerCapabilities` string.
+	// A full example would be "capabilities.containers.netflix.com/mycoolsidecar: FUSE"
+	AnnotationKeySuffixContainersCapabilities = "capabilities"
 
 	// logging config
 
