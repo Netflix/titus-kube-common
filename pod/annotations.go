@@ -163,9 +163,10 @@ const (
 	AnnotationKeySuffixContainersSidecar = "platform-sidecar"
 	// AnnotationKeySuffixContainersCapabilities is a per-container annotation that sets
 	// the Titus ContainerCapabilities setting for that container.
-	// Values of this annotation should be the string value in the protobuf enum,
+	// Values of this annotation should be a CSV of the string value in the protobuf enum,
 	// but without the `ContainerCapabilities` string.
-	// A full example would be "capabilities.containers.netflix.com/mycoolsidecar: FUSE"
+	// A full example would be "capabilities.containers.netflix.com/mycoolsidecar: FUSE,Default"
+	// Note that arbitrary combinations of capabilities are not necissarily valid.
 	AnnotationKeySuffixContainersCapabilities = "capabilities"
 
 	// logging config
