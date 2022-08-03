@@ -207,14 +207,10 @@ const (
 	AnnotationKeyPredRuntimeModelVersion = "runtime.predictions.titus.netflix.com/model-version"
 	AnnotationKeyPredRuntimeModelID      = "runtime.predictions.titus.netflix.com/model-id"
 
-	// mockVK
-	AnnotationKeyTitusParameterMockVkPrepareTime = "titusParameter.mockVK.prepareTime"
-	AnnotationKeyTitusParameterMockVkRunTime     = "titusParameter.mockVK.runTime"
-	AnnotationKeyTitusParameterMockVkKillTime    = "titusParameter.mockVK.killTime"
-
-	AnnotationKeyPodParameterMockVkPrepareTime = "github.com.netflix.titus.executor/killTime"
-	AnnotationKeyPodParameterMockVkRunTime     = "github.com.netflix.titus.executor/runTime"
-	AnnotationKeyPodParameterMockVkKillTime    = "github.com.netflix.titus.executor/killTime"
+	// mockPod
+	AnnotationKeyPodParameterMockPodPrepareTime = "mockPod.netflix.com/killTime"
+	AnnotationKeyPodParameterMockPodRunTime     = "mockPod.netflix.com/runTime"
+	AnnotationKeyPodParameterMockPodKillTime    = "mockPod.netflix.com/killTime"
 )
 
 func validateImage(image string) error {
