@@ -206,6 +206,11 @@ const (
 	AnnotationKeyPredRuntimeQuantiles    = "runtime.predictions.titus.netflix.com/quantiles"
 	AnnotationKeyPredRuntimeModelVersion = "runtime.predictions.titus.netflix.com/model-version"
 	AnnotationKeyPredRuntimeModelID      = "runtime.predictions.titus.netflix.com/model-id"
+
+	// mockPod
+	AnnotationKeyPodParameterMockPodPrepareTime = "mockPod.netflix.com/prepareTime"
+	AnnotationKeyPodParameterMockPodRunTime     = "mockPod.netflix.com/runTime"
+	AnnotationKeyPodParameterMockPodKillTime    = "mockPod.netflix.com/killTime"
 )
 
 func validateImage(image string) error {
@@ -701,4 +706,9 @@ func PlatformSidecars(annotations map[string]string) ([]PlatformSidecar, error) 
 	}
 
 	return sidecars, nil
+}
+
+func IsMockPod(pod *corev1.Pod) bool {
+	_, ok := pod.Annotations[AnnotationKeyPodParameterMockPodRunTime]
+	return ok
 }
