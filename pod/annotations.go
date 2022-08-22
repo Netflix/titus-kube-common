@@ -86,8 +86,7 @@ const (
 	// AnnotationKeyPodInjectedEnvVarNames tells the executor the names of the externally-injected environment variables,
 	// which neither come from the user nor titus itself, and should be ignored for identify verification purposes
 	AnnotationKeyPodInjectedEnvVarNames = "pod.titus.netflix.com/injected-env-var-names"
-	// AnnotationKeyImageTagPrefix stores the original tag for the an image.
-	// This is because on the v1 pod image field, there is only room for the digest and no room for the tag it came from
+	// Deprecated. Use AnnotationKeySuffixContainerImageTag instead
 	AnnotationKeyImageTagPrefix = "pod.titus.netflix.com/image-tag-"
 
 	// networking - used by the Titus CNI
@@ -168,6 +167,9 @@ const (
 	// A full example would be "capabilities.containers.netflix.com/mycoolsidecar: FUSE,Default"
 	// Note that arbitrary combinations of capabilities are not necissarily valid.
 	AnnotationKeySuffixContainersCapabilities = "capabilities"
+	// AnnotationKeySuffixContainerImageTag stores the original tag for the an image.
+	// This is because on the v1 pod image field, there is only room for the digest and no room for the tag it came from
+	AnnotationKeySuffixContainerImageTag = "image-tag"
 
 	// logging config
 
