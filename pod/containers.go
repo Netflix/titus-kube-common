@@ -51,6 +51,6 @@ func GetImageTagForContainer(cName string, pod *corev1.Pod) string {
 		return value
 	}
 	// Newer annotation with cName.containers.netflix.com/image-tag
-	value = ContainerAnnotation(cName, AnnotationKeySuffixContainerImageTag)
-	return value
+	key = ContainerAnnotation(cName, AnnotationKeySuffixContainerImageTag)
+	return pod.ObjectMeta.Annotations[key]
 }
