@@ -17,11 +17,12 @@ const (
 	LabelKeyCpuModelName    = "node.titus.netflix.com/cpu-model-name"
 
 	LabelValueBackendMock = "mock"
+	LabelValueBackendVK   = "virtual-kubelet"
 )
 
 func IsMockNode(node *corev1.Node) bool {
 	if val, ok := node.Labels[LabelKeyBackend]; ok {
-		return val == LabelValueBackendMock
+		return val == LabelValueBackendMock || val == LabelValueBackendVK
 	}
 	return false
 }
