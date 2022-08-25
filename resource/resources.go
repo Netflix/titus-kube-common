@@ -11,4 +11,9 @@ const (
 	ResourceNameDisk          = "ephemeral-storage"
 	ResourceNameDiskLegacy    = "storage"
 	ResourceNamePods          = "pods"
+	ResourceNameMockNodesPool = "mock-nodes"
 )
+
+func IsMockResourcePool(poolName string) bool {
+	return poolName == ResourceNameMockNodesPool
+}
