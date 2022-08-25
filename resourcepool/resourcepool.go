@@ -1,9 +1,12 @@
 package resourcepool
 
 const (
-	ResourcePoolMockPods = "mock-nodes"
+	ResourcePoolElastic    = "elastic"
+	ResourcePoolElasticGPU = "elasticGpu"
+	ResourcePoolReserved   = "reserved"
+	ResourcePoolMocNodes   = "mock-nodes"
 )
 
 func IsMockResourcePool(poolName string) bool {
-	return poolName == ResourcePoolMockPods
+	return poolName == ResourcePoolMocNodes
 }
