@@ -167,6 +167,19 @@ const (
 	// A full example would be "capabilities.containers.netflix.com/mycoolsidecar: FUSE,Default"
 	// Note that arbitrary combinations of capabilities are not necissarily valid.
 	AnnotationKeySuffixContainersCapabilities = "capabilities"
+	// AnnotationsKeySuffixContainersStartBefore provides a comma-separated
+	// list of other containers in the pod that should only be started
+	// *after* the specified container starts up. If startup order isn't
+	// specified, sidecars may be started in any order. Conflicting startup
+	// order requests are treated as an error.
+	AnnotationKeySuffixContainersStartBefore = "start-before"
+	// AnnotationsKeySuffixContainersStartBefore provides a comma-separated
+	// list of other containers in the pod that must be started *before* the
+	// specified container starts up. If startup order isn't specified,
+	// sidecars may be started in any order. Conflicting startup order
+	// requests are treated as an error.
+	AnnotationKeySuffixContainersStartAfter = "start-after"
+
 	// AnnotationKeySuffixContainerImageTag stores the original tag for the an image.
 	// This is because on the v1 pod image field, there is only room for the digest and no room for the tag it came from
 	AnnotationKeySuffixContainerImageTag = "image-tag"
