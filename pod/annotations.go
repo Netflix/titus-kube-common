@@ -169,15 +169,16 @@ const (
 	AnnotationKeySuffixContainersCapabilities = "capabilities"
 	// AnnotationsKeySuffixContainersStartBefore provides a comma-separated
 	// list of other containers in the pod that should only be started
-	// *after* the specified container starts up. If startup order isn't
-	// specified, sidecars may be started in any order. Conflicting startup
-	// order requests are treated as an error.
+	// *after* the specified container starts up and its health check
+	// succeeds. If startup order isn't specified, sidecars may be started
+	// in any order. Conflicting startup order requests are treated as an
+	// error.
 	AnnotationKeySuffixContainersStartBefore = "start-before"
 	// AnnotationsKeySuffixContainersStartBefore provides a comma-separated
-	// list of other containers in the pod that must be started *before* the
-	// specified container starts up. If startup order isn't specified,
-	// sidecars may be started in any order. Conflicting startup order
-	// requests are treated as an error.
+	// list of other containers in the pod that must be started and have
+	// their health checks succeed *before* the specified container starts
+	// up. If startup order isn't specified, sidecars may be started in any
+	// order. Conflicting startup order requests are treated as an error.
 	AnnotationKeySuffixContainersStartAfter = "start-after"
 
 	// AnnotationKeySuffixContainerImageTag stores the original tag for the an image.
