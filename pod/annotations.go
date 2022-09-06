@@ -77,6 +77,7 @@ const (
 	AnnotationKeyJobID                  = "v3.job.titus.netflix.com/id"
 	AnnotationKeyJobType                = "v3.job.titus.netflix.com/type"
 	AnnotationKeyJobDescriptor          = "v3.job.titus.netflix.com/descriptor"
+	AnnotationKeyJobApplicationName     = "v3.job.titus.netflix.com/application"
 	// AnnotationKeyPodTitusContainerInfo - to be removed once VK supports the full pod spec
 	AnnotationKeyPodTitusContainerInfo = "pod.titus.netflix.com/container-info"
 	// AnnotationKeyPodTitusEntrypointShellSplitting tells the executor to preserve the legacy shell splitting behaviour
@@ -141,6 +142,11 @@ const (
 	AnnotationKeyPredictionPredictionAvailable = "predictions.scheduler.titus.netflix.com/available"
 	// AnnotationKeyPredictionSelectorInfo - metadata from the prediction selection algorithm
 	AnnotationKeyPredictionSelectorInfo = "predictions.scheduler.titus.netflix.com/selector-info"
+
+	// pod preemption
+
+	AnnotationKeyPodPreemptedBy   = "preemption.netflix.com/preempted-by"
+	AnnotationKeyPodPreemptedPods = "preemption.netflix.com/preempted-pods"
 
 	// pod features
 
