@@ -88,7 +88,9 @@ const (
 	// which neither come from the user nor titus itself, and should be ignored for identify verification purposes
 	AnnotationKeyPodInjectedEnvVarNames = "pod.titus.netflix.com/injected-env-var-names"
 	// Deprecated. Use AnnotationKeySuffixContainerImageTag instead
-	AnnotationKeyImageTagPrefix = "pod.titus.netflix.com/image-tag-"
+	AnnotationKeyImageTagPrefix              = "pod.titus.netflix.com/image-tag-"
+	AnnotationKeyPodPriorityClassIntent      = "pod.titus.netflix.com/priority-class-intent"
+	AnnotationKeyPodPriorityClassPreemptible = "pod.titus.netflix.com/priority-class-preemptible"
 
 	// networking - used by the Titus CNI
 	AnnotationKeySubnetsLegacy             = "network.titus.netflix.com/subnets"
