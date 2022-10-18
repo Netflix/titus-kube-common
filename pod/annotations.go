@@ -86,7 +86,7 @@ const (
 	AnnotationKeyPodTitusSystemEnvVarNames = "pod.titus.netflix.com/system-env-var-names"
 	// AnnotationKeyPodInjectedEnvVarNames tells the executor the names of the externally-injected environment variables,
 	// which neither come from the user nor titus itself, and should be ignored for identify verification purposes
-	AnnotationKeyPodInjectedEnvVarNames = "pod.titus.netflix.com/injected-env-var-names"
+	AnnotationKeyPodInjectedEnvVarNames     = "pod.titus.netflix.com/injected-env-var-names"
 	AnnotationKeyPodPriorityClassIntent     = "pod.titus.netflix.com/priority-class-intent"
 	AnnotationKeyPodScheduledInTrough       = "pod.titus.netflix.com/scheduled-in-trough"
 	AnnotationKeyPodPreemptionResubmitCount = "resubmit-number.pod.netflix.com/preemption"
@@ -733,5 +733,10 @@ func PlatformSidecars(annotations map[string]string) ([]PlatformSidecar, error) 
 
 func IsMockPod(pod *corev1.Pod) bool {
 	_, ok := pod.Annotations[AnnotationKeyPodParameterMockPodRunTime]
+	return ok
+}
+
+func IsScheduledInTrough(pod *corev1.Pod) bool {
+	_, ok := pod.Annotations[AnnotationKeyPodScheduledInTrough]
 	return ok
 }
