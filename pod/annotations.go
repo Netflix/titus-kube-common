@@ -236,10 +236,8 @@ const (
 	AnnotationKeyPodParameterMockPodKillTime    = "mockPod.netflix.com/killTime"
 
 	// version recording; this is output from titus-executor mostly used
-	// for debugging. if we decide to add more versions here, let's make it
-	// one annotation with csv or similar.
-	AnnotationKeyRuntimeVersionTitusExecutor = "runtime.version.titus.netflix.com/titus-executor"
-	AnnotationKeyRuntimeVersionLinuxKernel   = "runtime.version.titus.netflix.com/linux-kernel"
+	// for debugging.
+	AnnotationKeyRuntimeVersions = "runtime.titus.netflix.com/versions"
 )
 
 func validateImage(image string) error {
