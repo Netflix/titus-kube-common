@@ -87,6 +87,7 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyJobType:                       "BATCH",
 		AnnotationKeyJobDescriptor:                 "myjobdesc",
 		AnnotationKeyPodTitusContainerInfo:         "cinfo",
+		AnnotationKeyImageTagPrefix + "main":       "testTag",
 		AnnotationKeyWorkloadDetail:                "mydetail",
 		AnnotationKeyWorkloadName:                  "myapp",
 		AnnotationKeyWorkloadOwnerEmail:            "test@example.com",
@@ -231,6 +232,9 @@ func TestParsePod(t *testing.T) {
 		TTYEnabled:             ptr.BoolPtr(true),
 	}
 	assert.DeepEqual(t, expConf, *conf)
+	tag, ok := GetImageTagForContainer("main", pod)
+	assert.Equal(t, tag, "testTag")
+	assert.Equal(t, ok, true)
 }
 
 func TestParsePodInvalid(t *testing.T) {
