@@ -10,6 +10,7 @@ const (
 	LabelKeyDecommissioning   = "node.titus.netflix.com/decommissioning"
 	LabelKeyInstanceID        = "node.titus.netflix.com/id"
 	LabelKeyRemovable         = "node.titus.netflix.com/removable"
+	LabelKeyUnremovable       = "node.titus.netflix.com/unremovable"
 	LabelKeyResourcePool      = "scaler.titus.netflix.com/resource-pool"
 	LabelKeyServerGroupIgnore = "scaler.titus.netflix.com/ignore"
 	LabelKeyTerminating       = "node.titus.netflix.com/terminating"
