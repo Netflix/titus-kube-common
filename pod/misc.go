@@ -11,4 +11,12 @@ const (
 	SchedNameMixed             = "titus-kube-scheduler-mixed"
 	SchedNameReserved          = "titus-kube-scheduler-reserved"
 	SchedNameRservedBinpacking = "titus-kube-scheduler-reserved-binpacking"
+
+	NamespaceDefault = "default"
+
+	ImagePullPolicyIfNotPresent = "IfNotPresent"
+
+	RestartPolicyNever = "Never"
+
+	DNSPolicyDefault = "Default"
 )
