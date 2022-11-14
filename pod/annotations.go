@@ -72,12 +72,13 @@ const (
 	AnnotationKeyWorkloadStack      = "workload.netflix.com/stack"
 
 	// Titus-specific fields
+	AnnotationKeyJobAcceptedTimestampMs    = "v3.job.titus.netflix.com/accepted-timestamp-ms"
+	AnnotationKeyJobID                     = "v3.job.titus.netflix.com/id"
+	AnnotationKeyJobType                   = "v3.job.titus.netflix.com/type"
+	AnnotationKeyJobDescriptor             = "v3.job.titus.netflix.com/descriptor"
+	AnnotationKeyJobApplicationName        = "v3.job.titus.netflix.com/application"
+	AnnotationKeyJobDisruptionBudgetPolicy = "v3.job.titus.netflix.com/disruption-budget-policy"
 
-	AnnotationKeyJobAcceptedTimestampMs = "v3.job.titus.netflix.com/accepted-timestamp-ms"
-	AnnotationKeyJobID                  = "v3.job.titus.netflix.com/id"
-	AnnotationKeyJobType                = "v3.job.titus.netflix.com/type"
-	AnnotationKeyJobDescriptor          = "v3.job.titus.netflix.com/descriptor"
-	AnnotationKeyJobApplicationName     = "v3.job.titus.netflix.com/application"
 	// AnnotationKeyPodTitusContainerInfo - to be removed once VK supports the full pod spec
 	AnnotationKeyPodTitusContainerInfo = "pod.titus.netflix.com/container-info"
 	// AnnotationKeyPodTitusEntrypointShellSplitting tells the executor to preserve the legacy shell splitting behaviour
@@ -86,7 +87,7 @@ const (
 	AnnotationKeyPodTitusSystemEnvVarNames = "pod.titus.netflix.com/system-env-var-names"
 	// AnnotationKeyPodInjectedEnvVarNames tells the executor the names of the externally-injected environment variables,
 	// which neither come from the user nor titus itself, and should be ignored for identify verification purposes
-	AnnotationKeyPodInjectedEnvVarNames     = "pod.titus.netflix.com/injected-env-var-names"
+	AnnotationKeyPodInjectedEnvVarNames = "pod.titus.netflix.com/injected-env-var-names"
 	// Deprecated. Use AnnotationKeySuffixContainerImageTag instead
 	AnnotationKeyImageTagPrefix             = "pod.titus.netflix.com/image-tag-"
 	AnnotationKeyPodPriorityClassIntent     = "pod.titus.netflix.com/priority-class-intent"
