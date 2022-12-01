@@ -94,6 +94,24 @@ const (
 	AnnotationKeyPodScheduledInTrough       = "pod.titus.netflix.com/scheduled-in-trough"
 	AnnotationKeyPodPreemptionResubmitCount = "resubmit-number.pod.netflix.com/preemption"
 
+	// AnnotationKeyPodTerminationReason is a human readable string indicating *why* a pod was terminated.
+	// It is the responsibility of any code that calls pod.delete() to populate this annotation so that operators
+	// of the system can understand why a pod was deleted.
+	AnnotationKeyPodTerminationReason = "pod.titus.netflix.com/pod-termination-reason"
+	// AnnotationKeyPodTerminationReasonCode is a structured annotation whose values should be
+	// one of the known AnnotationValuePodTerminationReasonCodes
+	AnnotationKeyPodTerminationReasonCode = "pod.titus.netflix.com/pod-termination-reason-code"
+	// AnnotationValuePodTerminationReasonCodeKilled should be used when a task is explicitly terminated by a user.
+	AnnotationValuePodTerminationReasonCodeKilled = "killed"
+	// AnnotationValuePodTerminationReasonCodeEvicted should be used when a task is terminated by an eviction service.
+	AnnotationValuePodTerminationReasonCodeEvicted = "evicted"
+	// AnnotationValuePodTerminationReasonCodePreempted should be used when a task is preempted by the scheduler to make space for another task.
+	AnnotationValuePodTerminationReasonCodePreempted = "preempted"
+	// AnnotationValuePodTerminationReasonCodeLost should be used when the task was lost, and its final status is unknown.
+	AnnotationValuePodTerminationReasonCodeLost = "lost"
+	// AnnotationKeyPodTerminationByCaller is a human readable string indicating which Titus component actually deleted the pod
+	AnnotationKeyPodTerminationByCaller = "pod.titus.netflix.com/pod-termination-by-caller"
+
 	// networking - used by the Titus CNI
 	AnnotationKeySubnetsLegacy             = "network.titus.netflix.com/subnets"
 	AnnotationKeyAccountIDLegacy           = "network.titus.netflix.com/accountId"
@@ -175,7 +193,7 @@ const (
 	// Values of this annotation should be a CSV of the string value in the protobuf enum,
 	// but without the `ContainerCapabilities` string.
 	// A full example would be "capabilities.containers.netflix.com/mycoolsidecar: FUSE,Default"
-	// Note that arbitrary combinations of capabilities are not necissarily valid.
+	// Note that arbitrary combinations of capabilities are not necessarily valid.
 	AnnotationKeySuffixContainersCapabilities = "capabilities"
 	// AnnotationsKeySuffixContainersStartBefore provides a comma-separated
 	// list of other containers in the pod that should only be started
