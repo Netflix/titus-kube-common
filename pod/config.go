@@ -46,6 +46,7 @@ type Config struct {
 	LogS3PathPrefix          *string
 	NetworkMode              *string
 	NetworkBurstingEnabled   *bool
+	NflxIMDSEnabled          *bool
 	OomScoreAdj              *int32
 	PodSchemaVersion         *uint32
 	ResourceCPU              *resource.Quantity

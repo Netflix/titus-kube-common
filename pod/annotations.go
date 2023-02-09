@@ -141,6 +141,7 @@ const (
 
 	AnnotationKeySecurityWorkloadMetadata    = "security.netflix.com/workload-metadata"
 	AnnotationKeySecurityWorkloadMetadataSig = "security.netflix.com/workload-metadata-sig"
+	AnnotationKeyNflxIMDSEnabled             = "security.netflix.com/nflx-imds-enabled"
 
 	// opportunistic resources (see control-plane and scheduler code) - deprecated
 
@@ -331,6 +332,10 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 		{
 			key:   AnnotationKeyPodTitusEntrypointShellSplitting,
 			field: &pConf.EntrypointShellSplitting,
+		},
+		{
+			key:   AnnotationKeyNflxIMDSEnabled,
+			field: &pConf.NflxIMDSEnabled,
 		},
 	}
 
