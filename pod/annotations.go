@@ -93,6 +93,7 @@ const (
 	AnnotationKeyPodPriorityClassIntent     = "pod.titus.netflix.com/priority-class-intent"
 	AnnotationKeyPodScheduledInTrough       = "pod.titus.netflix.com/scheduled-in-trough"
 	AnnotationKeyPodPreemptionResubmitCount = "resubmit-number.pod.netflix.com/preemption"
+	AnnotationKeyPodScheduledTroughName     = "pod.titus.netflix.com/scheduled-trough-name"
 
 	// AnnotationKeyPodTerminationReason is a human readable string indicating *why* a pod was terminated.
 	// It is the responsibility of any code that calls pod.delete() to populate this annotation so that operators
