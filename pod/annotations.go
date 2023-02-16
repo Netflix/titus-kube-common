@@ -94,6 +94,8 @@ const (
 	AnnotationKeyPodScheduledInTrough       = "pod.titus.netflix.com/scheduled-in-trough"
 	AnnotationKeyPodPreemptionResubmitCount = "resubmit-number.pod.netflix.com/preemption"
 	AnnotationKeyPodScheduledTroughName     = "pod.titus.netflix.com/scheduled-trough-name"
+	// AnnotationKeyRequestedTroughName is a name of a trough that the pod was requested to be scheduled in
+	AnnotationKeyRequestedTroughName = "pod.titus.netflix.com/requested-trough-name"
 
 	// AnnotationKeyPodTerminationReason is a human readable string indicating *why* a pod was terminated.
 	// It is the responsibility of any code that calls pod.delete() to populate this annotation so that operators
