@@ -725,9 +725,10 @@ func SidecarAnnotation(sidecarName, suffix string) string {
 }
 
 type PlatformSidecar struct {
-	Name     string
-	Channel  string
-	ArgsJSON []byte
+	Name                string
+	Channel             string
+	ArgsJSON            []byte
+	ChannelDefinitionID string
 }
 
 // PlatformSidecars parses sidecar-related annotations and returns a structured
@@ -755,6 +756,9 @@ func PlatformSidecars(annotations map[string]string) ([]PlatformSidecar, error) 
 		sidecar.Channel = channel
 		if args, ok := annotations[SidecarAnnotation(sidecar.Name, "arguments")]; ok {
 			sidecar.ArgsJSON = []byte(args)
+		}
+		if channelDefinitionID, ok := annotations[SidecarAnnotation(sidecar.Name, "channel-definition-id")]; ok {
+			sidecar.ChannelDefinitionID = channelDefinitionID
 		}
 		sidecars = append(sidecars, sidecar)
 	}
