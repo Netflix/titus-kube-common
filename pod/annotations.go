@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/distribution/reference"
 	"github.com/hashicorp/go-multierror"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -228,10 +227,6 @@ const (
 	AnnotationKeyLogUploadCheckInterval = "log.netflix.com/upload-check-interval"
 	AnnotationKeyLogUploadRegexp        = "log.netflix.com/upload-regexp"
 
-	// service configuration
-
-	AnnotationKeyServicePrefix = "service.netflix.com"
-
 	// sidecar configuration
 
 	AnnotationKeySuffixSidecars                      = "platform-sidecars.netflix.com"
@@ -264,22 +259,6 @@ const (
 	// for debugging.
 	AnnotationKeyRuntimeVersions = "runtime.titus.netflix.com/versions"
 )
-
-func validateImage(image string) error {
-	ref, err := reference.Parse(image)
-	if err != nil {
-		return err
-	}
-
-	_, digestOk := ref.(reference.Digested)
-	_, taggedOk := ref.(reference.Tagged)
-
-	if !digestOk && !taggedOk {
-		return errors.New("image does not have a digest or tag")
-	}
-
-	return nil
-}
 
 func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 	annotations := pod.GetAnnotations()
@@ -615,74 +594,6 @@ func parseAnnotations(pod *corev1.Pod, pConf *Config) error {
 
 	if pConf.SchedPolicy != nil && *pConf.SchedPolicy != "batch" && *pConf.SchedPolicy != "idle" {
 		err = multierror.Append(err, fmt.Errorf("%s annotation is not a valid scheduler policy: %s", AnnotationKeyPodSchedPolicy, *pConf.SchedPolicy))
-	}
-
-	if sErr := parseServiceAnnotations(annotations, pConf); sErr != nil {
-		err = multierror.Append(err, sErr)
-	}
-
-	if err == nil {
-		return nil
-	}
-	return err.ErrorOrNil()
-}
-
-// Parse the "service.netflix.com/svc.v0.name" annotations
-func parseServiceAnnotations(annotations map[string]string, pConf *Config) error {
-	var err *multierror.Error
-	sidecars := map[string]Sidecar{}
-
-	for k, v := range annotations {
-		if !strings.HasPrefix(k, AnnotationKeyServicePrefix) {
-			continue
-		}
-
-		// name, version, value, eg: servicemesh.v2.image
-		splitOut := strings.Split(strings.TrimPrefix(k, AnnotationKeyServicePrefix+"/"), ".")
-		if len(splitOut) != 3 {
-			err = multierror.Append(err, fmt.Errorf("annotation has an incorrect number of service configuration parameters: %s", k))
-			continue
-		}
-		name := splitOut[0]
-		version := splitOut[1]
-		param := splitOut[2]
-
-		sc, ok := sidecars[name+"."+version]
-		if !ok {
-			vInt, vErr := strconv.Atoi(strings.TrimPrefix(version, "v"))
-			if vErr != nil {
-				err = multierror.Append(err, fmt.Errorf("%s annotation has an incorrect service version number: %s", k, version))
-				continue
-			}
-
-			sc = Sidecar{
-				Name:    name,
-				Version: vInt,
-			}
-		}
-
-		if param == "enabled" {
-			boolVal, pErr := strconv.ParseBool(v)
-			if pErr != nil {
-				err = multierror.Append(err, fmt.Errorf("%s annotation has an incorrect service enabled boolean value: %s", k, v))
-				continue
-			}
-			sc.Enabled = boolVal
-		}
-
-		if param == "image" {
-			if iErr := validateImage(v); iErr != nil {
-				err = multierror.Append(err, fmt.Errorf("error parsing service image annotation: %s: %w", k, iErr))
-				continue
-			}
-			sc.Image = v
-		}
-
-		sidecars[name+"."+version] = sc
-	}
-
-	for _, sc := range sidecars {
-		pConf.Sidecars = append(pConf.Sidecars, sc)
 	}
 
 	if err == nil {

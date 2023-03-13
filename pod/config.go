@@ -59,7 +59,6 @@ type Config struct {
 	SeccompAgentPerfEnabled  *bool
 	TrafficSteeringEnabled   *bool
 	SecurityGroupIDs         *[]string
-	Sidecars                 []Sidecar
 	StaticIPAllocationUUID   *string
 	SystemEnvVarNames        []string
 	SubnetIDs                *[]string
