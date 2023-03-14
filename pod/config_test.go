@@ -1,7 +1,6 @@
 package pod
 
 import (
-	"sort"
 	"testing"
 	"time"
 
@@ -154,10 +153,6 @@ func TestParsePod(t *testing.T) {
 		AnnotationKeyLogStdioCheckInterval:  "2m",
 		AnnotationKeyLogUploadCheckInterval: "1m",
 		AnnotationKeyLogUploadThresholdTime: "3m",
-
-		// service config
-		AnnotationKeyServicePrefix + "/servicemesh.v2.enabled": "true",
-		AnnotationKeyServicePrefix + "/servicemesh.v2.image":   "titusops/servicemesh:latest",
 	}
 
 	labels := map[string]string{
@@ -221,15 +216,12 @@ func TestParsePod(t *testing.T) {
 		SeccompAgentPerfEnabled:  ptr.BoolPtr(true),
 		TrafficSteeringEnabled:   ptr.BoolPtr(true),
 		SecurityGroupIDs:         &sgIDs,
-		Sidecars: []Sidecar{
-			{Name: "servicemesh", Enabled: true, Image: "titusops/servicemesh:latest", Version: 2},
-		},
-		StaticIPAllocationUUID: ptr.StringPtr("static-ip-alloc-id"),
-		SubnetIDs:              &subnetIDs,
-		SystemEnvVarNames:      []string{"SYSTEM1", "SYSTEM2"},
-		InjectedEnvVarNames:    []string{"MUTATED1", "MUTATED2"},
-		TaskID:                 ptr.StringPtr("task-id-in-label"),
-		TTYEnabled:             ptr.BoolPtr(true),
+		StaticIPAllocationUUID:   ptr.StringPtr("static-ip-alloc-id"),
+		SubnetIDs:                &subnetIDs,
+		SystemEnvVarNames:        []string{"SYSTEM1", "SYSTEM2"},
+		InjectedEnvVarNames:      []string{"MUTATED1", "MUTATED2"},
+		TaskID:                   ptr.StringPtr("task-id-in-label"),
+		TTYEnabled:               ptr.BoolPtr(true),
 	}
 	assert.DeepEqual(t, expConf, *conf)
 	tag, ok := GetImageTagForContainer("main", pod)
@@ -290,30 +282,6 @@ func TestParsePodInvalid(t *testing.T) {
 			},
 			errMatch: "pod.netflix.com/sched-policy annotation is not a valid scheduler policy: something",
 		},
-		{
-			annotations: map[string]string{
-				AnnotationKeyServicePrefix + "/only-one-field": "true",
-			},
-			errMatch: "annotation has an incorrect number of service configuration parameters: service.netflix.com/only-one-field",
-		},
-		{
-			annotations: map[string]string{
-				AnnotationKeyServicePrefix + "/foo.vA.enabled": "true",
-			},
-			errMatch: "service.netflix.com/foo.vA.enabled annotation has an incorrect service version number",
-		},
-		{
-			annotations: map[string]string{
-				AnnotationKeyServicePrefix + "/foo.v1.enabled": "asdf",
-			},
-			errMatch: "service.netflix.com/foo.v1.enabled annotation has an incorrect service enabled boolean value: asdf",
-		},
-		{
-			annotations: map[string]string{
-				AnnotationKeyServicePrefix + "/foo.v1.image": "asdf",
-			},
-			errMatch: "error parsing service image annotation: service.netflix.com/foo.v1.image: image does not have a digest or tag",
-		},
 	}
 
 	for _, ann := range badAnnotations {
@@ -359,34 +327,3 @@ func TestLogUploadRegExp(t *testing.T) {
 	assert.Assert(t, conf.LogUploadRegExp != nil)
 	assert.Equal(t, conf.LogUploadRegExp.String(), ".*.foo")
 }
-
-func TestServiceAnnotations(t *testing.T) {
-	imgWithSha := "titusops/svc@sha256:5abd793cc69018e747cb8d4bc288f1df7b20747f91ec26da88f0fa4ba2ec46a1"
-	annotations := map[string]string{
-		AnnotationKeyServicePrefix + "/svc.v2.enabled": "false",
-		AnnotationKeyServicePrefix + "/svc.v2.image":   "titusops/svc:latest",
-		AnnotationKeyServicePrefix + "/svc.v3.enabled": "true",
-		AnnotationKeyServicePrefix + "/svc.v3.image":   imgWithSha,
-	}
-	labels := map[string]string{}
-
-	pod := buildPod(annotations, labels)
-	conf, err := PodToConfig(pod)
-	assert.NilError(t, err)
-
-	assert.Assert(t, len(conf.Sidecars) == 2)
-	sidecars := conf.Sidecars
-	sort.Slice(sidecars, func(i, j int) bool {
-		if sidecars[i].Name == sidecars[j].Name {
-			return sidecars[i].Version < sidecars[j].Version
-		}
-		return sidecars[i].Name < sidecars[j].Name
-	})
-
-	assert.DeepEqual(t, []Sidecar{
-		{Name: "svc", Enabled: false, Image: "titusops/svc:latest", Version: 2},
-		{Name: "svc", Enabled: true, Image: imgWithSha, Version: 3},
-	}, sidecars)
-}
-
-// XXX: test all nil
